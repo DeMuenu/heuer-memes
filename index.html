@@ -15,7 +15,8 @@
                 This webpage fetches a cat image from <a href="https://cataas.com/#/", target="_blank">cataas</a> and displays it below.
             </p>
         </div>
-        <div><button py-click="next()" id="next" class="py-button"><img id ="img" src="src"></div></button>
+        <div><img id ="img" src="src"></div>
+        <button py-click="next()" id="get-time" class="py-button">Get current time</button>
 
     <py-script>
 from pyodide.http import pyfetch
@@ -49,17 +50,18 @@ async def process_response(url):
                 src = None
                 return src
 
-img = await process_response("https://heuer-memes.ch/memes/1.png")
+img = process_response("heuer-memes.ch/memes/1.png")
 document.querySelector("img").setAttribute("src", img)
 count = 1
 
 def next():
       count = count + 1
       url = "https://heuer-memes.ch/memes/" + string(count) + ".png"
-      img = await process_response(url)
+      img = process_response(url)
       document.querySelector("img").setAttribute("src", img)
-      print(count)
+
       print(url)
+
     </py-script>
     </body>
 </html>
