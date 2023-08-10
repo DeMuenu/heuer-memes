@@ -16,7 +16,7 @@
             </p>
         </div>
         <div><img id ="img" src="src"></div>
-        <button py-click="next()" id="next" class="py-button">Next</button>
+        <button py-click="write_to_page()" id="manual">Say Hello</button>
 
     <py-script>
 from pyodide.http import pyfetch
@@ -50,13 +50,20 @@ async def process_response(url):
                 src = None
                 return src
 
-def next():
+def write_to_page():
   count = 2
   curl = "https://heuer-memes.ch/memes/" + str(count) + ".png"
   img = process_response(curl)
   document.querySelector("img").setAttribute("src", img)
 
 count = 1
+curl = "https://heuer-memes.ch/memes/" + str(count) + ".png"
+img = await process_response(curl)
+document.querySelector("img").setAttribute("src", img)
+
+sleep(5)
+
+count = 2
 curl = "https://heuer-memes.ch/memes/" + str(count) + ".png"
 img = await process_response(curl)
 document.querySelector("img").setAttribute("src", img)
