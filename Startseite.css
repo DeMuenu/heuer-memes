@@ -10,7 +10,7 @@
 
 .u-section-1 .u-image-1 {
   min-height: 400px;
-  background-image: url("memes/1.png");  
+  background-image: url("memes/1.png");
   --animation-custom_in-translate_x: -200px;
   --animation-custom_in-translate_y: 0px;
   --animation-custom_in-opacity: 0;
@@ -25,7 +25,7 @@
 
 .u-section-1 .u-image-2 {
   min-height: 400px;
-  background-image: url("memes/2.png");  
+  background-image: url("memes/2.png");
   --animation-custom_in-translate_y: 0px;
   --animation-custom_in-opacity: 0;
   --animation-custom_in-rotate: 0deg;
@@ -84,7 +84,9 @@
   .u-section-1 .u-image-2 {
     min-height: 239px;
   }
-}.u-section-2 .u-sheet-1 {
+}
+
+.u-section-2 .u-sheet-1 {
   min-height: 400px;
 }
 
@@ -96,7 +98,8 @@
 
 .u-section-2 .u-image-1 {
   min-height: 400px;
-  background-image: url("memes/3.png");    --animation-custom_in-translate_x: -200px;
+  background-image: url("memes/3.png");
+  --animation-custom_in-translate_x: -200px;
   --animation-custom_in-translate_y: 0px;
   --animation-custom_in-opacity: 0;
   --animation-custom_in-rotate: 0deg;
@@ -110,7 +113,8 @@
 
 .u-section-2 .u-image-2 {
   min-height: 400px;
-  background-image: url("memes/4.png");    --animation-custom_in-translate_x: 300px;
+  background-image: url("memes/4.png");
+  --animation-custom_in-translate_x: 300px;
   --animation-custom_in-translate_y: 0px;
   --animation-custom_in-opacity: 0;
   --animation-custom_in-rotate: 0deg;
@@ -170,7 +174,9 @@
   .u-section-2 .u-image-2 {
     min-height: 239px;
   }
-}.u-section-3 .u-sheet-1 {
+}
+
+.u-section-3 .u-sheet-1 {
   min-height: 400px;
 }
 
@@ -182,7 +188,8 @@
 
 .u-section-3 .u-image-1 {
   min-height: 400px;
-  background-image: url("memes/5.png");    --animation-custom_in-translate_x: -200px;
+  background-image: url("memes/5.gif");
+  --animation-custom_in-translate_x: -200px;
   --animation-custom_in-translate_y: 0px;
   --animation-custom_in-opacity: 0;
   --animation-custom_in-rotate: 0deg;
@@ -197,7 +204,8 @@
 
 .u-section-3 .u-image-2 {
   min-height: 400px;
-  background-image: url("memes/6.png");    --animation-custom_in-translate_x: 300px;
+  background-image: url("memes/6.gif");
+  --animation-custom_in-translate_x: 300px;
   --animation-custom_in-translate_y: 0px;
   --animation-custom_in-opacity: 0;
   --animation-custom_in-rotate: 0deg;
@@ -258,7 +266,9 @@
   .u-section-3 .u-image-2 {
     min-height: 239px;
   }
-}.u-section-4 .u-sheet-1 {
+}
+
+.u-section-4 .u-sheet-1 {
   min-height: 400px;
 }
 
@@ -270,7 +280,8 @@
 
 .u-section-4 .u-image-1 {
   min-height: 400px;
-  background-image: url("memes/7.png");    --animation-custom_in-translate_x: -200px;
+  background-image: url("memes/7.png");
+  --animation-custom_in-translate_x: -200px;
   --animation-custom_in-translate_y: 0px;
   --animation-custom_in-opacity: 0;
   --animation-custom_in-rotate: 0deg;
@@ -284,7 +295,8 @@
 
 .u-section-4 .u-image-2 {
   min-height: 400px;
-  background-image: url("memes/8.png");    --animation-custom_in-translate_x: 300px;
+  background-image: url("memes/8.png");
+  --animation-custom_in-translate_x: 300px;
   --animation-custom_in-translate_y: 0px;
   --animation-custom_in-opacity: 0;
   --animation-custom_in-rotate: 0deg;
