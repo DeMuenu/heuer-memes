@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Zitat-Spiel</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <h1>Wer hat das Zitat gesagt?</h1>
+    <div id="zitat-container">
+        <p id="zitat"></p>
+    </div>
+    <div id="antworten">
+        <button id="antwort1"></button>
+        <button id="antwort2"></button>
+    </div>
+    <p id="ergebnis"></p>
+    <p id="punktestand">Punktestand: 0</p>
+
+    <script>
+        // Array mit Zitaten und den zugehörigen Personen
+        const zitate = [
+            { text: "Radioaktive Strahlung ist nicht so gefährlich.", person1: "Heuer", person2: "Robert Oppenheimer" },
+            { text: "Die besten Dinge im Leben sind nicht die die man für Geld bekommt.", person1: "Albert Einstein", person2: "Heuer" },
+            { text: "Wer immer mit dem Auto fährt kommt nie zum Zug.", person1: "Kühn-Görg", person2: "Heuer" }
+            // Hier kannst du weitere Zitate und Personen hinzufügen
+        ];
+
+        let aktuellesZitatIndex = -1;
+        let punktestand = 0;
+        const zitatElement = document.getElementById("zitat");
+        const antwort1Button = document.getElementById("antwort1");
+        const antwort2Button = document.getElementById("antwort2");
+        const ergebnisElement = document.getElementById("ergebnis");
+        const punktestandElement = document.getElementById("punktestand");
+
+        function zufalligesZitatAnzeigen() {
+            if (zitate.length === 0) {
+                // Alle Zitate wurden gespielt, zeige Spielende-Nachricht
+                zitatElement.textContent = "Spiel beendet!";
+                antwort1Button.disabled = true;
+                antwort2Button.disabled = true;
+            } else {
+                const zufalligerIndex = Math.floor(Math.random() * zitate.length);
+                aktuellesZitatIndex = zufalligerIndex;
+                zitatElement.textContent = zitate[zufalligerIndex].text;
+
+                // Zufällige Anordnung der Personen in den Antwortbuttons
+                const personen = [zitate[zufalligerIndex].person1, zitate[zufalligerIndex].person2];
+                personen.sort(() => Math.random() - 0.5);
+
+                antwort1Button.textContent = personen[0];
+                antwort2Button.textContent = personen[1];
+            }
+        }
+
+        function pruefeAntwort(antwort) {
+            const zitat = zitate[aktuellesZitatIndex];
+            if (antwort === zitat.person1) {
+                ergebnisElement.textContent = "Richtig! " + antwort + " hat das Zitat gesagt.";
+                punktestand++;
+            } else {
+                ergebnisElement.textContent = "Falsch! Das Zitat wurde von " + zitat.person1 + " gesagt.";
+                punktestand = Math.max(0, punktestand - 1);
+            }
+            punktestandElement.textContent = "Punktestand: " + punktestand;
+
+            // Entferne das gespielte Zitat aus dem Array
+            zitate.splice(aktuellesZitatIndex, 1);
+
+            // Ein neues Zitat anzeigen
+            zufalligesZitatAnzeigen();
+        }
+
+        // Eventlistener für die Antwortbuttons
+        antwort1Button.addEventListener("click", function() {
+            pruefeAntwort(antwort1Button.textContent);
+        });
+
+        antwort2Button.addEventListener("click", function() {
+            pruefeAntwort(antwort2Button.textContent);
+        });
+
+        // Spiel starten
+        zufalligesZitatAnzeigen();
+    </script>
+</body>
+</html>
