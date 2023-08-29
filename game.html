@@ -29,7 +29,13 @@
             { text: "Die besten Dinge im Leben sind nicht die die man für Geld bekommt.", person1: "nicht Heuer", person2: "Heuer" },
             { text: "Wer immer mit dem Auto fährt kommt nie zum Zug.", person1: "nicht Heuer", person2: "Heuer" },
             { text: "Man trinkt zweimal im Jahr Kaffe und sagt dann, das sei eine Wirtschaftsregierung.", person1: "nicht Heuer", person2: "Heuer" },
-            { text: "Man trinkt zweimal im Jahr Kaffe und sagt dann, das sei eine Wirtschaftsregierung.", person1: "nicht Heuer", person2: "Heuer" }
+            { text: "Ich habe eine Erleuchtung.", person1: "Heuer", person2: "nicht Heuer"},
+            { text: "FBL (Fachbuch lesen)", person1: "nicht Heuer", person2: "Heuer" },
+            { text: "SBG (Suchen bis gefunden)", person1: "Heuer", person2: "nicht Heuer" },
+            { text: "GIDF (Google ist dein Freund)", person1: "Heuer", person2: "nicht Heuer" },
+            { text: "Die Pinguine kommen herein.", person1: "Heuer", person2: "nicht Heuer" },
+            { text: "Ich hatte Zuhause Plutonium.", person1: "nicht Heuer", person2: "Heuer" },
+            { text: "Freitag Nachmittag Motivation ist da.", person1: "nicht Heuer", person2: "Heuer" },
 
             // Hier kannst du weitere Zitate und Personen hinzufügen
         ];
@@ -65,10 +71,10 @@
         function pruefeAntwort(antwort) {
             const zitat = zitate[aktuellesZitatIndex];
             if (antwort === zitat.person1) {
-                ergebnisElement.textContent = "Richtig! " + antwort + " hat das Zitat gesagt.";
+                ergebnisElement.textContent = "Richtig! " + antwort + " war die richtige Antwort.";
                 punktestand++;
             } else {
-                ergebnisElement.textContent = "Falsch! Das Zitat wurde von " + zitat.person1 + " gesagt.";
+                ergebnisElement.textContent = "Falsch! Die richtige Antwort war:" + zitat.person1;
                 punktestand = Math.max(0, punktestand - 1);
             }
             punktestandElement.textContent = "Punktestand: " + punktestand;
