@@ -1,0 +1,5 @@
+RewriteEngine on
+
+RewriteCond %{HTTP_HOST} ^heuer-memes.ch [NC]
+
+RewriteRule ^(.*)$ http://www.heuer-memes.ch.com/$1 [L,R=301]
