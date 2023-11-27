@@ -1,10 +1,75 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Heuer-Reviews</title>
-    <link rel="stylesheet" href="https://pyscript.net/releases/2023.11.1/core.css" />
-    <script type="module" src="https://pyscript.net/releases/2023.11.1/core.js"></script>
+    <title>PyScript Twitter-ähnliche Seite</title>
+    <link rel="stylesheet" href="https://pyscript.net/latest/pyscript.css" />
+    <script defer src="https://pyscript.net/latest/pyscript.js"></script>
 </head>
+
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f0f2f5;
+    color: #333;
+    margin: 0;
+    padding: 20px;
+}
+
+h1 {
+    color: #1a8cff;
+}
+
+form {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+}
+
+input[type="text"] {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+button {
+    background-color: #1a8cff;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    text-transform: uppercase;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+button:hover {
+    background-color: #0f7ae5;
+}
+
+#posts {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+#posts div {
+    padding-bottom: 15px;
+    border-bottom: 1px solid #eee;
+    margin-bottom: 15px;
+}
+
+#posts p {
+    margin: 0;
+}
+
+</style>
+
 <body>
 
     <py-script>
@@ -13,9 +78,9 @@
 
     <h1>Mini-Twitter mit PyScript</h1>
 
-    <form py-submit="add_post()">
+    <form py-submit="add_post()" onsubmit="return false">
         <input type="text" id="postInput" placeholder="Was gibt's Neues?">
-        <button type="submit" py-on:click="add_post">Posten</button>
+        <button type="submit">Posten</button>
     </form>
 
     <div id="posts">
@@ -23,14 +88,43 @@
     </div>
 
 </body>
-
 <py-script>
-    def add_post():
-        post_content = Element('postInput').element.value
-        new_post = f"<div><p>{post_content}</p></div>"
-        Element('posts').element.innerHTML += new_post
-        #Element('postInput').element.value = ''
 
-</py-script>
+from js import fetch
+
+def load_images():
+    container = Element('posts').element
+    i = 1
+    while True:
+        image_url = f'root@vps2441966.servdiscount-customer.com/{i}.png'
+        try:
+            response = await fetch(image_url)
+            if response.status != 200:
+                raise Exception('Image not found')
+            
+            img_elem = document.createElement('img')
+            img_elem.src = image_url
+            container.appendChild(img_elem)
+
+            i += 1
+        except Exception as e:
+            print('No more images found, stopping search.')
+            break
+
+
+
+def add_post(): 
+
+    post_content = Element('postInput').element.value
+    new_post = f'<div><p>{post_content}</p></div>'
+    Element('posts').element.innerHTML += new_post
+    Element('postInput').element.value = ''
+
+
+load_images()
+
+    
+
+</py-script> 
 
 </html>
