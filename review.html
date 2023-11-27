@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Heuer-Reviews</title>
+    <link rel="stylesheet" href="https://pyscript.net/releases/2023.11.1/core.css" />
+    <script type="module" src="https://pyscript.net/releases/2023.11.1/core.js"></script>
+</head>
+<body>
+
+    <py-script>
+        # Hier kommt der Python-Code
+    </py-script>
+
+    <h1>Mini-Twitter mit PyScript</h1>
+
+    <form py-submit="add_post()">
+        <input type="text" id="postInput" placeholder="Was gibt's Neues?">
+        <button type="submit" py-on:click="add_post">Posten</button>
+    </form>
+
+    <div id="posts">
+        <!-- Hier werden die Posts angezeigt -->
+    </div>
+
+</body>
+
+<py-script>
+    def add_post():
+        post_content = Element('postInput').element.value
+        new_post = f"<div><p>{post_content}</p></div>"
+        Element('posts').element.innerHTML += new_post
+        #Element('postInput').element.value = ''
+
+</py-script>
+
+</html>
