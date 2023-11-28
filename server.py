@@ -1,24 +1,23 @@
-
+from flask import Flask, request, jsonify
 import socket
 from requests import get, post, request
 
 # import keepalive
+PassGlobal = "test"
 
 
 
+app = Flask(__name__)
 
-host = "localhost"
-port = 5345
+@app.route('/post', methods=['POST'])
+def handle_post():
+    content = request.json.get('content')
+    # You can add code here to process the received content
+    print("Received post:", content)
+    return jsonify({"message": "Post received successfully"})
 
-server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-server.bind((host, port))
-server.listen()
-
-# keepalive.set(server)
-
-while True:
-
-    client, address = server.accept()
+if __name__ == '__main__':
+    app.run(debug=True, port=5000)
 
     
 

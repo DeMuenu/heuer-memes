@@ -78,8 +78,8 @@ button:hover {
 
     <h1>Mini-Twitter mit PyScript</h1>
 
-    <form py-submit="add_post()" onsubmit="return false">
-        <input type="text" id="postInput" placeholder="Was gibt's Neues?">
+    <form py-submit="load_post()" onsubmit="return false">
+        <input type="text" id="password" placeholder="Was gibt's Neues?">
         <button type="submit">Posten</button>
     </form>
 
@@ -89,42 +89,27 @@ button:hover {
 
 </body>
 <py-script>
+from js import fetch, JSON
+import asyncio
 
-from js import fetch
+async def load_post():
+    print("sent")
+    post_content = Element('password').element.value
+    response = await fetch('http://127.0.0.1:5000/post', {
+        'method': 'POST',
+        'headers': {'Content-Type': 'application/json'},
+        'body': JSON.stringify({'content': post_content})
+    })
 
-def load_images():
-    container = Element('posts').element
-    i = 1
-    while True:
-        image_url = f'root@vps2441966.servdiscount-customer.com/{i}.png'
-        try:
-            response = await fetch(image_url)
-            if response.status != 200:
-                raise Exception('Image not found')
-            
-            img_elem = document.createElement('img')
-            img_elem.src = image_url
-            container.appendChild(img_elem)
+    if response.status == 200:
+        
+        new_post = f'<div><p>{post_content}</p></div>'
+        Element('posts').element.innerHTML += new_post
+        Element('password').element.value = ''  # Clear the input field
+    print("no Responce")
+    print(response)
 
-            i += 1
-        except Exception as e:
-            print('No more images found, stopping search.')
-            break
-
-
-
-def add_post(): 
-
-    post_content = Element('postInput').element.value
-    new_post = f'<div><p>{post_content}</p></div>'
-    Element('posts').element.innerHTML += new_post
-    Element('postInput').element.value = ''
-
-
-load_images()
-
-    
-
+    asyncio.ensure_future(load_post)
 </py-script> 
 
 </html>
