@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>HeuerNews</title>
+    <title>HeuerStories</title>
     <link rel="stylesheet" href="https://pyscript.net/latest/pyscript.css" />
     <script defer src="https://pyscript.net/latest/pyscript.js"></script>
 </head>
@@ -78,7 +78,7 @@ h6{
 <body>
 
 
-    <h1>Heuer-News</h1>
+    <h1>Heuer-Stories</h1>
 
     <form id="login" onsubmit="return false">
         <input type="password" id="password" placeholder="password">
@@ -101,7 +101,7 @@ import asyncio
 from pyodide.http import pyfetch
 import json
 password = ""
-ipPort = '127.0.0.1:5000'
+ipPort = 'vps2441966.servdiscount-customer.com:5000'
 
 async def post_tweet():
     tweet = Element('tweet-input').element.value
@@ -130,7 +130,7 @@ async def fetch_tweets():
         text = d['text']
         WrittenBy = d['by']
         new_post = f"<div><b>{title}</b><p>{text}</p><h6>Gepostet von {WrittenBy}</h6></div>"
-        Element('posts').element.innerHTML += new_post
+        Element('posts').element.innerHTML = new_post + Element('posts').element.innerHTML
 
 
 # Bind the post_tweet function to the button
