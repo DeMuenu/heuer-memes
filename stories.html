@@ -120,9 +120,12 @@ async def fetch_tweets():
     password = Element('password').element.value
     Element('posts').element.innerHTML = ''
     headers = {f'Authorization': password}
+    Element('password').element.style.display = 'none'
+    Element('post-buttonPW').element.innerHTML = 'Refresh Posts'
 
     response = await pyfetch(f'https://{ipPort}/get_tweets', method='GET', headers=headers)
     data = await response.json()
+    
     Element('posts').element.innerHTML = ''
     for d in data:
         d = dict(d)
