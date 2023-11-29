@@ -129,7 +129,7 @@ async def fetch_tweets():
     headers = {f'Authorization': password}
 
 
-    response = await pyfetch(f'https//{ipPort}/get_review', method='GET', headers=headers)
+    response = await pyfetch(f'https//{ipPort}/get_reviews', method='GET', headers=headers)
     data = await response.json()
 
     Element('password').element.style.display = 'none'
