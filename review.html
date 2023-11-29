@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>HeuerStories</title>
+    <link rel="stylesheet" href="https://pyscript.net/latest/pyscript.css" />
+    <script defer src="https://pyscript.net/latest/pyscript.js"></script>
+</head>
+
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f0f2f5;
+    color: #333;
+    margin: 0;
+    padding: 20px;
+}
+
+h1 {
+    color: #1a8cff;
+}
+
+form {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+}
+
+input[type="text"] {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+button {
+    background-color: #1a8cff;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    text-transform: uppercase;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+button:hover {
+    background-color: #0f7ae5;
+}
+
+#posts div{
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    padding-bottom: 15px;
+    border-bottom: 1px solid #eee;
+    margin-bottom: 15px;
+}
+
+#posts div {
+
+}
+
+#posts p {
+    margin: 0;
+}
+
+h6{
+    color = lightblue;
+}
+
+#send {
+    display: none;
+}
+
+</style>
+
+<body>
+
+
+    <h1>Heuer-Stories</h1>
+
+    <form id="login" onsubmit="return false">
+        <input type="password" id="password" placeholder="password">
+        <button type="submit" id="post-buttonPW">Login</button>
+    </form>
+
+    <form id="send" onsubmit="return false">
+        <input type="text" id="tweet-titel" placeholder="Titel">
+        <input type="text" id="tweet-input" placeholder="Was ist passiert?">
+        <button type="submit" id="post-button">Posten</button>
+    </form>
+
+    <div id="posts">
+        <!-- Hier werden die Posts angezeigt -->
+    </div>
+
+</body>
+<py-script>
+import asyncio
+from pyodide.http import pyfetch
+import json
+password = ""
+ipPort = '127.0.0.1:5000'
+
+async def post_tweet():
+    tweet = Element('tweet-input').element.value
+    password = Element('password').element.value
+    tweetTitel = Element('tweet-titel').element.value
+
+    headers = {'Content-Type': 'application/json'}
+    body = json.dumps({'tweetTitle': tweetTitel,'tweet': tweet, 'password': password})
+    if tweet and password and tweetTitel:
+        response = await pyfetch(f'http://{ipPort}/post_review', method='POST', headers=headers, body=body)
+        asyncio.create_task(fetch_tweets())
+
+    Element('tweet-input').element.value = ''
+    Element('tweet-titel').element.value = ''
+
+    # Add logic to handle the response
+
+async def fetch_tweets():
+    password = Element('password').element.value
+    Element('posts').element.innerHTML = ''
+    headers = {f'Authorization': password}
+
+
+    response = await pyfetch(f'http//{ipPort}/get_review', method='GET', headers=headers)
+    data = await response.json()
+
+    Element('password').element.style.display = 'none'
+    Element('post-buttonPW').element.innerHTML = 'Refresh Posts'
+    Element('send').element.style.display = 'block'
+    Element('posts').element.innerHTML = ''
+    
+    for d in data:
+        d = dict(d)
+        title = d['title']
+        text = d['text']
+        WrittenBy = d['by']
+        new_post = f"<div><b>{title}</b><p>{text}</p><h6>Gepostet von {WrittenBy}</h6></div>"
+        Element('posts').element.innerHTML = new_post + Element('posts').element.innerHTML
+
+
+# Bind the post_tweet function to the button
+def on_post_click(event):
+    asyncio.create_task(post_tweet())
+
+def on_post_clickPW(event):
+    asyncio.create_task(fetch_tweets())
+
+Element('post-button').element.onclick = on_post_click
+Element('post-buttonPW').element.onclick = on_post_clickPW
+
+# Schedule fetch_tweets to run asynchronously
+#asyncio.create_task(fetch_tweets())
+</py-script>
+
+
+
+
+
+</html>
