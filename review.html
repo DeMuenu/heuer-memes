@@ -105,7 +105,7 @@ import asyncio
 from pyodide.http import pyfetch
 import json
 password = ""
-ipPort = '127.0.0.1:5000'
+ipPort = 'vps2441966.servdiscount-customer.com:5000'
 
 async def post_tweet():
     tweet = Element('tweet-input').element.value
@@ -115,7 +115,7 @@ async def post_tweet():
     headers = {'Content-Type': 'application/json'}
     body = json.dumps({'tweetTitle': tweetTitel,'tweet': tweet, 'password': password})
     if tweet and password and tweetTitel:
-        response = await pyfetch(f'http://{ipPort}/post_review', method='POST', headers=headers, body=body)
+        response = await pyfetch(f'https://{ipPort}/post_review', method='POST', headers=headers, body=body)
         asyncio.create_task(fetch_tweets())
 
     Element('tweet-input').element.value = ''
@@ -129,7 +129,7 @@ async def fetch_tweets():
     headers = {f'Authorization': password}
 
 
-    response = await pyfetch(f'http//{ipPort}/get_review', method='GET', headers=headers)
+    response = await pyfetch(f'https//{ipPort}/get_review', method='GET', headers=headers)
     data = await response.json()
 
     Element('password').element.style.display = 'none'
