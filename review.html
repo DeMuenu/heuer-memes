@@ -134,7 +134,8 @@ async def fetch_tweets():
 
     Element('password').element.style.display = 'none'
     Element('post-buttonPW').element.innerHTML = 'Refresh Posts'
-    Element('send').element.style.display = 'block'
+    if password[0] == 'g':
+        Element('send').element.style.display = 'block'
     Element('posts').element.innerHTML = ''
     
     for d in data:
