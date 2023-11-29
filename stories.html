@@ -118,6 +118,9 @@ async def post_tweet():
         response = await pyfetch(f'https://{ipPort}/post_tweet', method='POST', headers=headers, body=body)
         asyncio.create_task(fetch_tweets())
 
+    Element('tweet-input').element.value = ''
+    Element('tweet-titel').element.value = ''
+
     # Add logic to handle the response
 
 async def fetch_tweets():
