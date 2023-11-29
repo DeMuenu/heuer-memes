@@ -73,6 +73,10 @@ h6{
     color = lightblue;
 }
 
+#send {
+    display: none;
+}
+
 </style>
 
 <body>
@@ -87,7 +91,7 @@ h6{
 
     <form id="send" onsubmit="return false">
         <input type="text" id="tweet-titel" placeholder="Titel">
-        <input type="text" id="tweet-input" placeholder="Was gibt's Neues?">
+        <input type="text" id="tweet-input" placeholder="Was ist passiert?">
         <button type="submit" id="post-button">Posten</button>
     </form>
 
@@ -120,13 +124,16 @@ async def fetch_tweets():
     password = Element('password').element.value
     Element('posts').element.innerHTML = ''
     headers = {f'Authorization': password}
-    Element('password').element.style.display = 'none'
-    Element('post-buttonPW').element.innerHTML = 'Refresh Posts'
+
 
     response = await pyfetch(f'https://{ipPort}/get_tweets', method='GET', headers=headers)
     data = await response.json()
-    
+
+    Element('password').element.style.display = 'none'
+    Element('post-buttonPW').element.innerHTML = 'Refresh Posts'
+    Element('send').element.style.display = 'block'
     Element('posts').element.innerHTML = ''
+    
     for d in data:
         d = dict(d)
         title = d['title']
