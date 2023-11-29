@@ -111,7 +111,7 @@ async def post_tweet():
     headers = {'Content-Type': 'application/json'}
     body = json.dumps({'tweetTitle': tweetTitel,'tweet': tweet, 'password': password})
     if tweet and password and tweetTitel:
-        response = await pyfetch(f'http://{ipPort}/post_tweet', method='POST', headers=headers, body=body)
+        response = await pyfetch(f'https://{ipPort}/post_tweet', method='POST', headers=headers, body=body)
         asyncio.create_task(fetch_tweets())
 
     # Add logic to handle the response
@@ -121,7 +121,7 @@ async def fetch_tweets():
     Element('posts').element.innerHTML = ''
     headers = {f'Authorization': password}
 
-    response = await pyfetch(f'http://{ipPort}/get_tweets', method='GET', headers=headers)
+    response = await pyfetch(f'https://{ipPort}/get_tweets', method='GET', headers=headers)
     data = await response.json()
     Element('posts').element.innerHTML = ''
     for d in data:
