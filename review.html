@@ -74,7 +74,7 @@ h6{
 }
 
 #send {
-    display: none;
+    display: block;
 }
 
 </style>
@@ -91,7 +91,7 @@ h6{
 
     <form id="send" onsubmit="return false">
         <input type="text" id="tweet-titel" placeholder="Titel">
-        <input type="text" id="tweet-input" placeholder="Was ist passiert?">
+        <input type="file" id="fileInput" name="file" accept="image/*"><br><br>
         <button type="submit" id="post-button">Posten</button>
     </form>
 
@@ -103,41 +103,46 @@ h6{
 <py-script>
 import asyncio
 from pyodide.http import pyfetch
+from js import document, FormData, console, fetch
 import json
 password = ""
-ipPort = 'vps2441966.servdiscount-customer.com:5000'
+ipPort = 'http://127.0.0.1:5000'
 
 async def post_tweet():
-    tweet = Element('tweet-input').element.value
-    password = Element('password').element.value
-    tweetTitel = Element('tweet-titel').element.value
+    file_input = document.querySelector("#fileInput")
+    if file_input.files.length == 0:
+        console.log("No file selected.")
+        return
 
-    headers = {'Content-Type': 'application/json'}
-    body = json.dumps({'tweetTitle': tweetTitel,'tweet': tweet, 'password': password})
-    if tweet and password and tweetTitel:
-        response = await pyfetch(f'https://{ipPort}/post_review', method='POST', headers=headers, body=body)
-        asyncio.create_task(fetch_tweets())
+    form_data = FormData.new()
+    form_data.append("file", file_input.files.item(0))  # Revised line
+    headers = {'Content-Type': 'multipart/form-data'}
+    response = await fetch(f"{ipPort}/post_review", 
+        method="POST",
+        body=form_data
+    )
 
-    Element('tweet-input').element.value = ''
-    Element('tweet-titel').element.value = ''
-
-    # Add logic to handle the response
+    if response.ok:
+        text = await response.text()
+        console.log(text)
+    else:
+        console.error("Failed to upload file.")
 
 async def fetch_tweets():
     password = Element('password').element.value
     Element('posts').element.innerHTML = ''
     headers = {f'Authorization': password}
 
-
-    response = await pyfetch(f'https://{ipPort}/get_reviews', method='GET', headers=headers)
+    
+    response = await pyfetch(f'{ipPort}/get_reviews', method='GET', headers=headers)
     data = await response.json()
 
     Element('password').element.style.display = 'none'
     Element('post-buttonPW').element.innerHTML = 'Refresh Posts'
-    if password[0] == 'g':
-        Element('send').element.style.display = 'block'
     Element('posts').element.innerHTML = ''
     
+    print(data)
+
     for d in data:
         d = dict(d)
         title = d['title']
@@ -158,7 +163,7 @@ Element('post-button').element.onclick = on_post_click
 Element('post-buttonPW').element.onclick = on_post_clickPW
 
 # Schedule fetch_tweets to run asynchronously
-#asyncio.create_task(fetch_tweets())
+asyncio.create_task(fetch_tweets())
 </py-script>
 
 

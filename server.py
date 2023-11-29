@@ -2,16 +2,20 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 import random
 import pickle
+import os
+import time    
+
 
 anfaenge = ["Gagi des", "Furz vom", "Kinder des", "Penis des", "Arschhaar des", "Theodor der", "Heuer der"]
 endungen = ["Master", "Krieger", "Magier", "Baron", "Herrscher", "Fortnite Enjoyer"]
 
 app = Flask(__name__)
 CORS(app)
-passwordGlobal = "test"
+passwordGlobal = "gg"
 viewPass = "view"
 # Dummy storage for tweets
 tweets = []
+rewiews = []
 
 with open('tweets.pkl', 'rb') as file:
     if file:
@@ -44,27 +48,28 @@ def handle_get_tweets():
 
 @app.route('/post_review', methods=['POST'])
 def handle_post_review():
-    data = request.json
-    password = data.get('password')
-    if password == passwordGlobal:
-        anfang = random.choice(anfaenge)
-        ende = random.choice(endungen)
-        name = f"{anfang} {ende}"
-        tweets.append({'title': data['tweetTitle'], 'text': data['tweet'], 'by': name})
-        with open('tweets.pkl', 'wb') as file:
-            pickle.dump(tweets, file)
-        return jsonify({'message': 'Tweet posted successfully'}), 200
-    else:
-        return jsonify({'message': 'Unauthorized'}), 401
+    if 'file' not in request.files:
+        return 'No file part'
+    file = request.files['file']
+    if file.filename == '':
+        return 'No selected file'
+    if 'file' in request.files:
+        file = request.files['file']
+    if file:
+        # Process the file as needed, e.g., save it
+        filename = str(time.time()) + ".png"
+        file.save(f"C:/Hehe/{filename}")
+        
+        rewiews.append({"filename" : filename, "reviews" : []})
+        return(rewiews)
 
 @app.route('/get_reviews', methods=['GET'])
 def handle_get_review():
-    auth_header = request.headers.get('Authorization')
-    if auth_header and auth_header == passwordGlobal:
-        return jsonify(tweets), 200
-    else:
-        return jsonify({'message': 'Unauthorized'}), 401
+#    auth_header = request.headers.get('Authorization')
+#    if auth_header and auth_header == passwordGlobal:
+    return(rewiews, 200)
+
    
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    app.run(debug=True)#host='0.0.0.0', port=5000)
