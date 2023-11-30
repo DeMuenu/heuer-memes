@@ -67,7 +67,7 @@ def handle_post_review():
             file.save(f"{pahtHTTPS}{filename}")
             
             rewiews.append({"filename" : filename, "reviews" : []})
-            return(rewiews)
+            return jsonify(rewiews), 200
         else:
             return jsonify({'message': 'Unauthorized'}), 401
 
@@ -75,7 +75,7 @@ def handle_post_review():
 def handle_get_review():
 #    auth_header = request.headers.get('Authorization')
 #    if auth_header and auth_header == passwordGlobal:
-    return(rewiews, 200)
+    return jsonify(rewiews), 200
 
    
 
