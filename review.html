@@ -103,7 +103,7 @@ h6{
 <py-script>
 import asyncio
 from pyodide.http import pyfetch
-from js import document, FormData, console, fetch
+from js import document, FormData, console, fetch, window
 import json
 
 ip = 'https://vps2441966.servdiscount-customer.com'
@@ -131,6 +131,17 @@ async def post_tweet():
     else:
         console.error("Failed to upload file.")
 
+def post_review(title: str):
+    comment_input = Element(f'comment-input-{title}')
+    comment = comment_input.element.value
+    if comment:
+        comments_div = Element(f'comments-{title}')
+        comments_div.element.innerHTML += f"<p>{comment}</p>"
+        comment_input.element.value = ''
+
+
+
+
 async def fetch_tweets():
 
     
@@ -145,11 +156,31 @@ async def fetch_tweets():
     for d in data:
         d = dict(d)
         title = d['filename'].replace('.png', '')
+        title = title.replace('.', '_')
         url = d['filename']
         url = f"{ip}/{url}"
-        new_post = f"<div><b>{title}</b><img src=" + url + "></img></div>"
+        new_post = f"""
+        <div>
+            <div><b>{title}</b></div>
+            <div><img src='{url}'></img></div>
+            <div id='comments-{title}' class='comments'></div>
+            <input type='text' id='comment-input-{title}' placeholder='Add a comment...'>
+            <button onclick="post_review('{title}')">Comment</button>
+        </div>
+        """
+        for c in d["reviews"]:
+            comment_input = Element(f'comment-input-{title}')
+            comment = comment_input.element.value
+            if comment:
+                comments_div = Element(f'comments-{title}')
+                comments_div.element.innerHTML += f"<p>{comment}</p>"
+                comment_input.element.value = ''
 
         Element('posts').element.innerHTML = new_post + Element('posts').element.innerHTML
+        
+
+
+
 
 
 # Bind the post_tweet function to the button
@@ -161,6 +192,8 @@ def on_post_clickPW(event):
 
 Element('post-button').element.onclick = on_post_click
 Element('post-buttonPW').element.onclick = on_post_clickPW
+
+window.post_review = post_review
 
 # Schedule fetch_tweets to run asynchronously
 asyncio.create_task(fetch_tweets())
