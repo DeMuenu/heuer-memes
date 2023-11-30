@@ -11,11 +11,14 @@ endungen = ["Master", "Krieger", "Magier", "Baron", "Herrscher", "Fortnite Enjoy
 
 app = Flask(__name__)
 CORS(app)
+
+pahtHTTPS = "C:/Hehe/"
 passwordGlobal = "gg"
 viewPass = "view"
 # Dummy storage for tweets
 tweets = []
 rewiews = []
+
 
 with open('tweets.pkl', 'rb') as file:
     if file:
@@ -56,12 +59,17 @@ def handle_post_review():
     if 'file' in request.files:
         file = request.files['file']
     if file:
+        auth_header = request.headers.get('Authorization')
+        print(auth_header)
         # Process the file as needed, e.g., save it
-        filename = str(time.time()) + ".png"
-        file.save(f"C:/Hehe/{filename}")
-        
-        rewiews.append({"filename" : filename, "reviews" : []})
-        return(rewiews)
+        if auth_header and auth_header == passwordGlobal:
+            filename = str(time.time()) + ".png"
+            file.save(f"{pahtHTTPS}{filename}")
+            
+            rewiews.append({"filename" : filename, "reviews" : []})
+            return(rewiews)
+        else:
+            return jsonify({'message': 'Unauthorized'}), 401
 
 @app.route('/get_reviews', methods=['GET'])
 def handle_get_review():
@@ -72,4 +80,4 @@ def handle_get_review():
    
 
 if __name__ == '__main__':
-    app.run(debug=True)#host='0.0.0.0', port=5000)
+    app.run(debug=True)#host='0.0.0.0', port=5000, ssl_context=('/etc/letsencrypt/live/vps2441966.servdiscount-customer.com/fullchain.pem', '/etc/letsencrypt/live/vps2441966.servdiscount-customer.com/privkey.pem'))

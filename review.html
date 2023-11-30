@@ -85,11 +85,11 @@ h6{
     <h1>Heuer-Stories</h1>
 
     <form id="login" onsubmit="return false">
-        <input type="password" id="password" placeholder="password">
-        <button type="submit" id="post-buttonPW">Login</button>
+        <button type="submit" id="post-buttonPW">Refresh</button>
     </form>
 
     <form id="send" onsubmit="return false">
+        <input type="password" id="password" placeholder="password">
         <input type="text" id="tweet-titel" placeholder="Titel">
         <input type="file" id="fileInput" name="file" accept="image/*"><br><br>
         <button type="submit" id="post-button">Posten</button>
@@ -105,39 +105,38 @@ import asyncio
 from pyodide.http import pyfetch
 from js import document, FormData, console, fetch
 import json
-password = ""
-ipPort = 'http://127.0.0.1:5000'
+
+ip = 'https://vps2441966.servdiscount-customer.com'
+ipPort = 'https://vps2441966.servdiscount-customer.com:5000'
 
 async def post_tweet():
     file_input = document.querySelector("#fileInput")
+    password = Element('password').element.value
+
     if file_input.files.length == 0:
         console.log("No file selected.")
         return
 
     form_data = FormData.new()
     form_data.append("file", file_input.files.item(0))  # Revised line
-    headers = {'Content-Type': 'multipart/form-data'}
-    response = await fetch(f"{ipPort}/post_review", 
+    headers = {'Authorization': password}
+    response = await pyfetch(f"{ipPort}/post_review", 
         method="POST",
+        headers=headers,
         body=form_data
     )
 
     if response.ok:
-        text = await response.text()
-        console.log(text)
+        console.log(uploaded)
     else:
         console.error("Failed to upload file.")
 
 async def fetch_tweets():
-    password = Element('password').element.value
-    Element('posts').element.innerHTML = ''
-    headers = {f'Authorization': password}
 
     
-    response = await pyfetch(f'{ipPort}/get_reviews', method='GET', headers=headers)
+    response = await pyfetch(f'{ipPort}/get_reviews', method='GET')
     data = await response.json()
 
-    Element('password').element.style.display = 'none'
     Element('post-buttonPW').element.innerHTML = 'Refresh Posts'
     Element('posts').element.innerHTML = ''
     
@@ -145,10 +144,11 @@ async def fetch_tweets():
 
     for d in data:
         d = dict(d)
-        title = d['title']
-        text = d['text']
-        WrittenBy = d['by']
-        new_post = f"<div><b>{title}</b><p>{text}</p><h6>Gepostet von {WrittenBy}</h6></div>"
+        title = d['filename'].replace('.png', '')
+        url = d['filename']
+        url = f"{ip}/{url}"
+        new_post = f"<div><b>{title}</b><img src=" + url + "></img></div>"
+
         Element('posts').element.innerHTML = new_post + Element('posts').element.innerHTML
 
 
