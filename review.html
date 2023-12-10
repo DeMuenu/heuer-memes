@@ -169,11 +169,9 @@ async def fetch_tweets():
         </div>
         """
         for c in d["reviews"]:
-            comment_input = Element(f'comment-input-{title}')
-            comment = comment_input.element.value
-            if comment:
+            if c:
                 comments_div = Element(f'comments-{title}')
-                comments_div.element.innerHTML += f"<p>{comment}</p>"
+                comments_div.element.innerHTML += f"<p>{c}</p>"
                 comment_input.element.value = ''
 
         Element('posts').element.innerHTML = new_post + Element('posts').element.innerHTML
