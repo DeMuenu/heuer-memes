@@ -1,12 +1,18 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>HeuerStories</title>
+    <title>Heuer Reviews</title>
     <link rel="stylesheet" href="https://pyscript.net/latest/pyscript.css" />
     <script defer src="https://pyscript.net/latest/pyscript.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 </head>
 
 <style>
+
+.checked {
+  color: orange;
+}
+
 body {
     font-family: Arial, sans-serif;
     background-color: #f0f2f5;
@@ -77,20 +83,33 @@ h6{
     display: block;
 }
 
+#login {
+    display:none;
+}
+
+#send {
+    display:none;
+}
+
 </style>
 
 <body>
 
 
-    <h1>Heuer-Stories</h1>
+    <h1>Heuer-Reviews</h1>
 
     <form id="login" onsubmit="return false">
         <button type="submit" id="post-buttonPW">Refresh</button>
     </form>
 
-    <form id="send" onsubmit="return false">
+    <form id="PW" onsubmit="return false">
+        <label for="password">Password wird nur zum Posten von Bildern und Kommentaren benötigt</label><br>
         <input type="password" id="password" placeholder="password">
-        <input type="text" id="tweet-titel" placeholder="Titel">
+        <button type="submit" id="PWlock">Lock Password</button>
+    </form>
+
+    <form id="send" onsubmit="return false">
+        <!-- <input type="text" id="tweet-titel" placeholder="Titel">-->
         <input type="file" id="fileInput" name="file" accept="image/*"><br><br>
         <button type="submit" id="post-button">Posten</button>
     </form>
@@ -130,14 +149,44 @@ async def post_tweet():
         console.log("uploaded")
     else:
         console.error("Failed to upload file.")
+        print("Wrong Password LOL")
+    asyncio.create_task(fetch_tweets())
 
-def post_review(title: str):
+async def post_review(title: str):
+
     comment_input = Element(f'comment-input-{title}')
     comment = comment_input.element.value
+
+    star_input = Element(f'sterne-input-{title}')
+    stars = star_input.element.value
+
+
+
     if comment:
         comments_div = Element(f'comments-{title}')
-        comments_div.element.innerHTML += f"<p>{comment}</p>"
-        comment_input.element.value = ''
+        
+
+        tweet = comment
+        password = Element('password').element.value
+        tweetTitel = title
+
+        console.log(tweetTitel)
+        console.log(password)
+        console.log(tweet)
+
+        headers = {'Content-Type': 'application/json'}
+        body = json.dumps({'tweetTitle': tweetTitel,'tweet': tweet, 'password': password, 'stars': stars})
+        if tweet and password and tweetTitel:
+            response = await pyfetch(f'{ipPort}/post_comment', method='POST', headers=headers, body=body)
+
+            if response.ok:
+                asyncio.create_task(fetch_tweets())
+                comment_input.element.value = ''
+            else:
+                print("Wrong Password LOL")
+
+            
+
 
 
 
@@ -150,8 +199,6 @@ async def fetch_tweets():
 
     Element('post-buttonPW').element.innerHTML = 'Refresh Posts'
     Element('posts').element.innerHTML = ''
-    
-    print(data)
 
     for d in data:
         d = dict(d)
@@ -161,24 +208,26 @@ async def fetch_tweets():
         url = f"{ip}/{url}"
         new_post = f"""
         <div>
-            <div><b>{title}</b></div>
             <div><img src='{url}'></img></div>
             <div id='comments-{title}' class='comments'></div>
+            <input type='number' id='sterne-input-{title}' placeholder='Wieviel von 5 Sternen'>
             <input type='text' id='comment-input-{title}' placeholder='Add a comment...'>
             <button onclick="post_review('{title}')">Comment</button>
         </div>
         """
-        for c in d["reviews"]:
-            if c:
-                comments_div = Element(f'comments-{title}')
-                comments_div.element.innerHTML += f"<p>{c}</p>"
-                comment_input.element.value = ''
 
         Element('posts').element.innerHTML = new_post + Element('posts').element.innerHTML
         
+        for c in d["reviews"]:
+            if c:
+                comments_div = Element(f'comments-{title}')
+                comments_div.element.innerHTML += f"""<div class='comments'><p>{c}</p></div>"""
+                #comment_input.element.value = ''
 
 
-
+async def PWlock():
+    Element('PW').element.style.display = 'none'
+    Element('send').element.style.display = 'block'
 
 
 # Bind the post_tweet function to the button
@@ -188,8 +237,12 @@ def on_post_click(event):
 def on_post_clickPW(event):
     asyncio.create_task(fetch_tweets())
 
+def on_PWlock(event):
+    asyncio.create_task(PWlock())
+
 Element('post-button').element.onclick = on_post_click
 Element('post-buttonPW').element.onclick = on_post_clickPW
+Element('PWlock').element.onclick = on_PWlock
 
 window.post_review = post_review
 
