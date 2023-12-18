@@ -107,7 +107,7 @@ def handle_post_comment():
 
             print(filename)
             if t["filename"] == filename:
-                t["reviews"].append(data["tweet"])
+                t["reviews"].append([data["tweet"], data ["stars"]])
                 with open('rewiews.pkl', 'wb') as file:
                     pickle.dump(rewiews, file)
 
@@ -121,4 +121,4 @@ def handle_post_comment():
 
 if __name__ == '__main__':
     #app.run(debug=True)#host='0.0.0.0', port=5000, ssl_context=('/etc/letsencrypt/live/vps2441966.servdiscount-customer.com/fullchain.pem', '/etc/letsencrypt/live/vps2441966.servdiscount-customer.com/privkey.pem'))
-    app.run(debug=True, host='0.0.0.0', port=5000, ssl_context=('/etc/letsencrypt/live/vps2441966.servdiscount-customer.com/fullchain.pem', '/etc/letsencrypt/live/vps2441966.servdiscount-customer.com/privkey.pem'))
+    app.run(host='0.0.0.0', port=5000, ssl_context=('/etc/letsencrypt/live/vps2441966.servdiscount-customer.com/fullchain.pem', '/etc/letsencrypt/live/vps2441966.servdiscount-customer.com/privkey.pem'))

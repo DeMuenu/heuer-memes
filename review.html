@@ -25,6 +25,10 @@ h1 {
     color: #1a8cff;
 }
 
+img {
+    max-width: 100%;
+}
+
 form {
     background-color: white;
     padding: 20px;
@@ -89,6 +93,20 @@ h6{
 
 #send {
     display:none;
+}
+
+.comment {
+    max-width: 100%;
+    word-break: break-all;
+    overflow-wrap: break-word;
+    overflow: auto;
+}
+
+.comments{
+    width: 98%; /* Adjust the width as needed */
+    word-break: break-word;
+    overflow-wrap: break-word;
+    overflow: auto;
 }
 
 </style>
@@ -200,19 +218,25 @@ async def fetch_tweets():
     Element('post-buttonPW').element.innerHTML = 'Refresh Posts'
     Element('posts').element.innerHTML = ''
 
+    #print(data)
+
     for d in data:
         d = dict(d)
         title = d['filename'].replace('.png', '')
         title = title.replace('.', '_')
         url = d['filename']
         url = f"{ip}/{url}"
+        commentButtonString = ""
+        password = Element('password').element.value
+        if password:
+            commentButtonString = f"""<input type='number' id='sterne-input-{title}' placeholder='Wieviel von 5 Sternen'>
+            <input type='text' id='comment-input-{title}' placeholder='Add a comment...'>
+            <button onclick="post_review('{title}')">Comment</button>"""
         new_post = f"""
         <div>
             <div><img src='{url}'></img></div>
             <div id='comments-{title}' class='comments'></div>
-            <input type='number' id='sterne-input-{title}' placeholder='Wieviel von 5 Sternen'>
-            <input type='text' id='comment-input-{title}' placeholder='Add a comment...'>
-            <button onclick="post_review('{title}')">Comment</button>
+            {commentButtonString}
         </div>
         """
 
@@ -220,14 +244,24 @@ async def fetch_tweets():
         
         for c in d["reviews"]:
             if c:
+                starString = ""
+                #print(c[1])
+                for i in range(5):
+                    if int(c[1])-1 >= i:
+                        starString = starString + """<span class="fa fa-star checked"></span>"""
+                    else:
+                        starString = starString + """<span class="fa fa-star"></span>"""
+
+
                 comments_div = Element(f'comments-{title}')
-                comments_div.element.innerHTML += f"""<div class='comments'><p>{c}</p></div>"""
+                comments_div.element.innerHTML += f"""<div class='comments'>{starString}<p>{c[0]}</p></div>"""
                 #comment_input.element.value = ''
 
 
 async def PWlock():
     Element('PW').element.style.display = 'none'
     Element('send').element.style.display = 'block'
+    asyncio.create_task(fetch_tweets())
 
 
 # Bind the post_tweet function to the button
