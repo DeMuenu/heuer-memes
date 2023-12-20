@@ -109,6 +109,9 @@ h6{
     overflow-wrap: break-word;
     overflow: auto;
 }
+#star {
+    margin-right: 10px;
+}
 
 </style>
 
@@ -249,9 +252,9 @@ async def fetch_tweets():
                 #print(c[1])
                 for i in range(5):
                     if int(c[1])-1 >= i:
-                        starString = starString + """<span class="fa fa-star checked"></span>"""
+                        starString = starString + """<span id="star" class="fa fa-star checked"></span>"""
                     else:
-                        starString = starString + """<span class="fa fa-star"></span>"""
+                        starString = starString + """<span id="star" class="fa fa-star"></span>"""
 
 
                 comments_div = Element(f'comments-{title}')
