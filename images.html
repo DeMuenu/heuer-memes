@@ -236,8 +236,20 @@ async def fetch_tweets():
             commentButtonString = f"""<input type='number' id='sterne-input-{title}' placeholder='Wieviel von 5 Sternen'>
             <input type='text' id='comment-input-{title}' placeholder='Add a comment...'>
             <button onclick="post_review('{title}')">Comment</button>"""
+
+        SimuWarning = ""
+        print(d)
+        if "isSimu" in d:
+            print("Simu")
+            if d["isSimu"] == True:
+                SimuWarning = "<p>Achtung, Propaganda der Obrigkeit</p>"
+        else:
+            print("Simu not")
+
+
         new_post = f"""
         <div>
+            {SimuWarning}
             <div><img src='{url}'></img></div>
             <div id='comments-{title}' class='comments'></div>
             {commentButtonString}
