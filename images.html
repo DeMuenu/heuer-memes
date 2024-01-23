@@ -238,13 +238,13 @@ async def fetch_tweets():
             <button onclick="post_review('{title}')">Comment</button>"""
 
         SimuWarning = ""
-        print(d)
+        #print(d)
         if "isSimu" in d:
-            print("Simu")
+            #print("Simu")
             if d["isSimu"] == True:
                 SimuWarning = "<p>Achtung, Propaganda der Obrigkeit</p>"
         else:
-            print("Simu not")
+            #print("Simu not")
 
 
         new_post = f"""
