@@ -13,8 +13,8 @@ app = Flask(__name__)
 CORS(app)
 
 pahtHTTPS = "/var/www/html/"
-passwordGlobal = "goldenHeuer"
-viewPass = "view"
+passwordGlobal = "..."
+viewPass = "..."
 # Dummy storage for tweets
 tweets = []
 rewiews = []
