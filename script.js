@@ -149,6 +149,11 @@ function initHeuerReviews() {
 
   // Upload an image (called "post_tweet" in the original PyScript)
   async function uploadReviewImage() {
+    const reviewsPage = document.getElementById('heuer-reviews-page');
+    if (!reviewsPage) {
+      // Not on Heuer-Reviews, so do nothing
+      return;
+    }
     const pw = passwordInput.value.trim();
     if (!fileInput.files || fileInput.files.length === 0) {
       console.log('No file selected');
@@ -342,6 +347,11 @@ function initHeuerKunst() {
     /*             Upload (post_tweet) => AI Image               */
     /*************************************************************/
     async function uploadAiImage() {
+      const kunstPage = document.getElementById('heuer-kunst-page');
+      if (!kunstPage) {
+        // Not on Heuer-Kunst, so do nothing
+        return;
+      }
       const pw = passwordInput.value.trim();
       if (!fileInput.files || fileInput.files.length === 0) {
         console.log('No file selected');
