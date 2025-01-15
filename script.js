@@ -9,6 +9,11 @@ const ipPortReviews = 'https://vps2441966.servdiscount-customer.com:5000';
 /*                   Website One: Heuer-Stories              */
 /*************************************************************/
 function initHeuerStories() {
+    const storiesPage = document.getElementById('heuer-stories-page');
+    if (!storiesPage) {
+      // Not on Heuer-Stories, so do nothing
+      return;
+    }
   const loginForm = document.getElementById('login');
   const sendForm = document.getElementById('send');
   const postButtonPW = document.getElementById('post-buttonPW');
@@ -119,6 +124,11 @@ function initHeuerStories() {
 /*                   Website Two: Heuer-Reviews              */
 /*************************************************************/
 function initHeuerReviews() {
+    const reviewsPage = document.getElementById('heuer-reviews-page');
+    if (!reviewsPage) {
+        // Not on Heuer-Reviews, so do nothing
+        return;
+    }
   const loginForm = document.getElementById('login');
   const pwForm = document.getElementById('PW');
   const sendForm = document.getElementById('send');
@@ -300,6 +310,11 @@ function initHeuerReviews() {
 
 /*************************************************************/
 function initHeuerKunst() {
+    const kunstPage = document.getElementById('heuer-kunst-page');
+    if (!kunstPage) {
+      // Not on Heuer-Kunst, so do nothing
+      return;
+    }
     // Check if we are on the Heuer-Kunst page by looking for a known element
     const loginForm = document.getElementById('login');
     const pwForm = document.getElementById('PW');
