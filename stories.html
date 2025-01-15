@@ -1,170 +1,98 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>HeuerStories</title>
-     <!-- PyScript CSS -->
-    <link rel="stylesheet" href="https://pyscript.net/releases/2023.11.1/core.css">
-    <script type="module" src="https://pyscript.net/releases/2023.11.1/core.js"></script>
+  <meta charset="UTF-8"/>
+  <title>HeuerStories</title>
+  <!-- Example "modern" touch: A Google Font (optional) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link 
+    href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" 
+    rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Roboto', sans-serif;
+      background: linear-gradient(to right, #ece9e6, #ffffff);
+      color: #333;
+      margin: 0;
+      padding: 20px;
+    }
+    h1 {
+      color: #1a8cff;
+      margin-bottom: 1rem;
+    }
+    form {
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+      max-width: 400px;
+    }
+    input[type="password"],
+    input[type="text"] {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+    button {
+      background-color: #1a8cff;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      text-transform: uppercase;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background-color 0.3s;
+    }
+    button:hover {
+      background-color: #0f7ae5;
+    }
+    #posts div {
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      border-bottom: 1px solid #eee;
+      margin-bottom: 15px;
+    }
+    #posts p {
+      margin: 0.5rem 0;
+    }
+    h6 {
+      margin-top: 0.5rem;
+      color: #888;
+      font-weight: 400;
+    }
+    #send {
+      display: none;
+    }
+  </style>
 </head>
 
-<style>
-body {
-    font-family: Arial, sans-serif;
-    background-color: #f0f2f5;
-    color: #333;
-    margin: 0;
-    padding: 20px;
-}
-
-h1 {
-    color: #1a8cff;
-}
-
-form {
-    background-color: white;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    margin-bottom: 20px;
-}
-
-input[type="text"] {
-    width: 100%;
-    padding: 10px;
-    margin-bottom: 10px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    box-sizing: border-box;
-}
-
-button {
-    background-color: #1a8cff;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    text-transform: uppercase;
-    border-radius: 4px;
-    cursor: pointer;
-    font-weight: bold;
-}
-
-button:hover {
-    background-color: #0f7ae5;
-}
-
-#posts div{
-    background-color: white;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    padding-bottom: 15px;
-    border-bottom: 1px solid #eee;
-    margin-bottom: 15px;
-}
-
-#posts div {
-
-}
-
-#posts p {
-    margin: 0;
-}
-
-h6{
-    color = lightblue;
-}
-
-#send {
-    display: none;
-}
-
-</style>
-
 <body>
+  <h1>Heuer-Stories</h1>
+  
+  <form id="login" onsubmit="return false">
+    <input type="password" id="password" placeholder="Password">
+    <button type="submit" id="post-buttonPW">Login</button>
+  </form>
 
+  <form id="send" onsubmit="return false">
+    <input type="text" id="tweet-titel" placeholder="Titel">
+    <input type="text" id="tweet-input" placeholder="Was ist passiert?">
+    <button type="submit" id="post-button">Posten</button>
+  </form>
 
-    <h1>Heuer-Stories</h1>
+  <div id="posts">
+    <!-- The posts will appear here -->
+  </div>
 
-    <form id="login" onsubmit="return false">
-        <input type="password" id="password" placeholder="password">
-        <button type="submit" id="post-buttonPW">Login</button>
-    </form>
-
-    <form id="send" onsubmit="return false">
-        <input type="text" id="tweet-titel" placeholder="Titel">
-        <input type="text" id="tweet-input" placeholder="Was ist passiert?">
-        <button type="submit" id="post-button">Posten</button>
-    </form>
-
-    <div id="posts">
-        <!-- Hier werden die Posts angezeigt -->
-    </div>
-
+  <!-- Include external script -->
+  <script src="script.js"></script>
 </body>
-<py-script>
-import asyncio
-from pyodide.http import pyfetch
-import json
-
-password = ""
-ipPort = 'vps2441966.servdiscount-customer.com:5000'
-
-async def post_tweet():
-    tweet = Element('tweet-input').element.value
-    password = Element('password').element.value
-    tweetTitel = Element('tweet-titel').element.value
-
-    headers = {'Content-Type': 'application/json'}
-    body = json.dumps({'tweetTitle': tweetTitel,'tweet': tweet, 'password': password})
-    if tweet and password and tweetTitel:
-        response = await pyfetch(f'https://{ipPort}/post_tweet', method='POST', headers=headers, body=body)
-        asyncio.create_task(fetch_tweets())
-
-    Element('tweet-input').element.value = ''
-    Element('tweet-titel').element.value = ''
-
-    # Add logic to handle the response
-
-async def fetch_tweets():
-    password = Element('password').element.value
-    Element('posts').element.innerHTML = ''
-    headers = {f'Authorization': password}
-
-
-    response = await pyfetch(f'https://{ipPort}/get_tweets', method='GET', headers=headers)
-    data = await response.json()
-
-    Element('password').element.style.display = 'none'
-    Element('post-buttonPW').element.innerHTML = 'Refresh Posts'
-    if password[0] == 'g':
-        Element('send').element.style.display = 'block'
-    Element('posts').element.innerHTML = ''
-    
-    for d in data:
-        d = dict(d)
-        title = d['title']
-        text = d['text']
-        WrittenBy = d['by']
-        new_post = f"<div><b>{title}</b><p>{text}</p><h6>Gepostet von {WrittenBy}</h6></div>"
-        Element('posts').element.innerHTML = new_post + Element('posts').element.innerHTML
-
-
-# Bind the post_tweet function to the button
-def on_post_click(event):
-    asyncio.create_task(post_tweet())
-
-def on_post_clickPW(event):
-    asyncio.create_task(fetch_tweets())
-
-Element('post-button').element.onclick = on_post_click
-Element('post-buttonPW').element.onclick = on_post_clickPW
-
-# Schedule fetch_tweets to run asynchronously
-#asyncio.create_task(fetch_tweets())
-</py-script>
-
-
-
-
-
 </html>

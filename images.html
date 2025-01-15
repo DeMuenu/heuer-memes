@@ -1,306 +1,131 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Heuer Kunst</title>
-    <link rel="stylesheet" href="https://pyscript.net/latest/pyscript.css" />
-    <script defer src="https://pyscript.net/latest/pyscript.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <meta charset="UTF-8">
+  <title>Heuer Kunst</title>
+
+  <!-- Example "modern" touch: a Google Font (optional) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link 
+    href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" 
+    rel="stylesheet">
+  
+  <!-- Font Awesome (for stars) -->
+  <link 
+    rel="stylesheet" 
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  
+  <style>
+    body {
+      font-family: 'Roboto', sans-serif;
+      background: linear-gradient(to right, #f0f2f5, #ffffff);
+      color: #333;
+      margin: 0;
+      padding: 20px;
+    }
+    h1 {
+      color: #1a8cff;
+      margin-bottom: 1rem;
+    }
+    img {
+      max-width: 100%;
+      max-height: 500px;
+    }
+    form {
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+      max-width: 400px;
+    }
+    input[type="text"],
+    input[type="password"],
+    input[type="file"],
+    input[type="number"] {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+    button {
+      background-color: #1a8cff;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      text-transform: uppercase;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background-color 0.3s;
+    }
+    button:hover {
+      background-color: #0f7ae5;
+    }
+    #posts div {
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      margin-bottom: 15px;
+    }
+    #posts p {
+      margin: 0.5rem 0;
+    }
+    .comments {
+      margin-top: 10px;
+      word-wrap: break-word;
+    }
+    .fa-star {
+      margin-right: 5px;
+    }
+    .checked {
+      color: orange;
+    }
+    #login {
+      display: none;
+    }
+    #PW {
+      max-width: 400px;
+    }
+    #send {
+      display: none;
+    }
+  </style>
 </head>
 
-<style>
-
-.checked {
-  color: orange;
-}
-
-body {
-    font-family: Arial, sans-serif;
-    background-color: #f0f2f5;
-    color: #333;
-    margin: 0;
-    padding: 20px;
-}
-
-h1 {
-    color: #1a8cff;
-}
-
-img {
-    max-width: 100%;
-    max-height: 500px;
-}
-
-form {
-    background-color: white;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    margin-bottom: 20px;
-}
-
-input[type="text"] {
-    width: 100%;
-    padding: 10px;
-    margin-bottom: 10px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    box-sizing: border-box;
-}
-
-button {
-    background-color: #1a8cff;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    text-transform: uppercase;
-    border-radius: 4px;
-    cursor: pointer;
-    font-weight: bold;
-}
-
-button:hover {
-    background-color: #0f7ae5;
-}
-
-#posts div{
-    background-color: white;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    padding-bottom: 15px;
-    border-bottom: 1px solid #eee;
-    margin-bottom: 15px;
-}
-
-#posts div {
-
-}
-
-#posts p {
-    margin: 0;
-}
-
-h6{
-    color = lightblue;
-}
-
-#send {
-    display: block;
-}
-
-#login {
-    display:none;
-}
-
-#send {
-    display:none;
-}
-
-.comment {
-    max-width: 100%;
-    word-break: break-all;
-    overflow-wrap: break-word;
-    overflow: auto;
-}
-
-.comments{
-    width: 98%; /* Adjust the width as needed */
-    word-break: break-word;
-    overflow-wrap: break-word;
-    overflow: auto;
-}
-#star {
-    margin-right: 10px;
-}
-
-</style>
-
 <body>
+  <h1>Heuer-Kunst</h1>
 
+  <!-- Hidden "login" form from original, used for refresh button only -->
+  <form id="login" onsubmit="return false">
+    <button type="submit" id="post-buttonPW">Refresh</button>
+  </form>
 
-    <h1>Heuer-Kunst</h1>
+  <!-- Password form -->
+  <form id="PW" onsubmit="return false">
+    <label for="password">
+      Password wird nur zum Posten von Bildern und Kommentaren benötigt
+    </label>
+    <br>
+    <input type="password" id="password" placeholder="password">
+    <button type="submit" id="PWlock">Lock Password</button>
+  </form>
 
-    <form id="login" onsubmit="return false">
-        <button type="submit" id="post-buttonPW">Refresh</button>
-    </form>
+  <!-- Form to upload an image (send form) -->
+  <form id="send" onsubmit="return false">
+    <input type="file" id="fileInput" name="file" accept="image/*"><br>
+    <button type="submit" id="post-button">Posten</button>
+  </form>
 
-    <form id="PW" onsubmit="return false">
-        <label for="password">Password wird nur zum Posten von Bildern und Kommentaren benötigt</label><br>
-        <input type="password" id="password" placeholder="password">
-        <button type="submit" id="PWlock">Lock Password</button>
-    </form>
+  <div id="posts">
+    <!-- AI images + comments will appear here -->
+  </div>
 
-    <form id="send" onsubmit="return false">
-        <!-- <input type="text" id="tweet-titel" placeholder="Titel">-->
-        <input type="file" id="fileInput" name="file" accept="image/*"><br><br>
-        <button type="submit" id="post-button">Posten</button>
-    </form>
-
-    <div id="posts">
-        <!-- Hier werden die Posts angezeigt -->
-    </div>
-
+  <!-- Include the external script (make sure the path is correct) -->
+  <script src="script.js"></script>
 </body>
-<py-script>
-import asyncio
-from pyodide.http import pyfetch
-from js import document, FormData, console, fetch, window
-import json
-
-ip = 'https://vps2441966.servdiscount-customer.com'
-ipPort = 'https://vps2441966.servdiscount-customer.com:5000'
-
-async def post_tweet():
-    file_input = document.querySelector("#fileInput")
-    password = Element('password').element.value
-
-    if file_input.files.length == 0:
-        console.log("No file selected.")
-        return
-
-    form_data = FormData.new()
-    form_data.append("file", file_input.files.item(0))  # Revised line
-    headers = {'Authorization': password}
-    response = await pyfetch(f"{ipPort}/post_ai", 
-        method="POST",
-        headers=headers,
-        body=form_data
-    )
-
-    if response.ok:
-        console.log("uploaded")
-    else:
-        console.error("Failed to upload file.")
-        print("Wrong Password LOL")
-    asyncio.create_task(fetch_tweets())
-
-async def post_review(title: str):
-
-    comment_input = Element(f'comment-input-{title}')
-    comment = comment_input.element.value
-
-    star_input = Element(f'sterne-input-{title}')
-    stars = star_input.element.value
-
-
-
-    if comment:
-        comments_div = Element(f'comments-{title}')
-        
-
-        tweet = comment
-        password = Element('password').element.value
-        tweetTitel = title
-
-        console.log(tweetTitel)
-        console.log(password)
-        console.log(tweet)
-
-        headers = {'Content-Type': 'application/json'}
-        body = json.dumps({'tweetTitle': tweetTitel,'tweet': tweet, 'password': password, 'stars': stars})
-        if tweet and password and tweetTitel:
-            response = await pyfetch(f'{ipPort}/post_aicomment', method='POST', headers=headers, body=body)
-
-            if response.ok:
-                asyncio.create_task(fetch_tweets())
-                comment_input.element.value = ''
-            else:
-                print("Wrong Password LOL")
-
-            
-
-
-
-
-
-async def fetch_tweets():
-
-    
-    response = await pyfetch(f'{ipPort}/get_ai', method='GET')
-    data = await response.json()
-
-    Element('post-buttonPW').element.innerHTML = 'Refresh Posts'
-    Element('posts').element.innerHTML = ''
-
-    #print(data)
-
-    for d in data:
-        d = dict(d)
-        title = d['filename'].replace('.png', '')
-        title = title.replace('.', '_')
-        url = d['filename']
-        url = f"{ip}/{url}"
-        commentButtonString = ""
-        password = Element('password').element.value
-        if password:
-            commentButtonString = f"""<input type='number' id='sterne-input-{title}' placeholder='Wieviel von 5 Sternen'>
-            <input type='text' id='comment-input-{title}' placeholder='Add a comment...'>
-            <button onclick="post_review('{title}')">Comment</button>"""
-
-        SimuWarning = ""
-        #print(d)
-        if "isSimu" in d:
-            #print("Simu")
-            if d["isSimu"] == True:
-                SimuWarning = "<p>Achtung, Propaganda der Obrigkeit</p>"
-
-
-
-        new_post = f"""
-        <div>
-            {SimuWarning}
-            <div><img src='{url}'></img></div>
-            <div id='comments-{title}' class='comments'></div>
-            {commentButtonString}
-        </div>
-        """
-
-        Element('posts').element.innerHTML = new_post + Element('posts').element.innerHTML
-        
-        for c in d["reviews"]:
-            if c:
-                starString = ""
-                #print(c[1])
-                for i in range(5):
-                    if int(c[1])-1 >= i:
-                        starString = starString + """<span id="star" class="fa fa-star checked"></span>"""
-                    else:
-                        starString = starString + """<span id="star" class="fa fa-star"></span>"""
-
-
-                comments_div = Element(f'comments-{title}')
-                comments_div.element.innerHTML += f"""<div class='comments'>{starString}<p>{c[0]}</p></div>"""
-                #comment_input.element.value = ''
-
-
-async def PWlock():
-    Element('PW').element.style.display = 'none'
-    Element('send').element.style.display = 'block'
-    asyncio.create_task(fetch_tweets())
-
-
-# Bind the post_tweet function to the button
-def on_post_click(event):
-    asyncio.create_task(post_tweet())
-
-def on_post_clickPW(event):
-    asyncio.create_task(fetch_tweets())
-
-def on_PWlock(event):
-    asyncio.create_task(PWlock())
-
-Element('post-button').element.onclick = on_post_click
-Element('post-buttonPW').element.onclick = on_post_clickPW
-Element('PWlock').element.onclick = on_PWlock
-
-window.post_review = post_review
-
-# Schedule fetch_tweets to run asynchronously
-asyncio.create_task(fetch_tweets())
-</py-script>
-
-
-
-
-
 </html>
