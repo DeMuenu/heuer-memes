@@ -129,12 +129,13 @@ function initHeuerReviews() {
         // Not on Heuer-Reviews, so do nothing
         return;
     }
+    console.log(">> initHeuerReviews is running on this page <<");
   const loginForm = document.getElementById('login');
   const pwForm = document.getElementById('PW');
   const sendForm = document.getElementById('send');
   const pwLockButton = document.getElementById('PWlock');
   const refreshButton = document.getElementById('post-buttonPW');
-  const postButton = document.getElementById('post-button');
+  const postButton = document.getElementById('post-button-Review');
   const passwordInput = document.getElementById('password');
   const fileInput = document.getElementById('fileInput');
   const postsDiv = document.getElementById('posts');
@@ -320,13 +321,14 @@ function initHeuerKunst() {
       // Not on Heuer-Kunst, so do nothing
       return;
     }
+    console.log(">> initHeuerKunst is running on this page <<");
     // Check if we are on the Heuer-Kunst page by looking for a known element
     const loginForm = document.getElementById('login');
     const pwForm = document.getElementById('PW');
     const sendForm = document.getElementById('send');
     const pwLockButton = document.getElementById('PWlock');
     const refreshButton = document.getElementById('post-buttonPW');
-    const postButton = document.getElementById('post-button');
+    const postButton = document.getElementById('post-button-Art');
     const passwordInput = document.getElementById('password');
     const fileInput = document.getElementById('fileInput');
     const postsDiv = document.getElementById('posts');
