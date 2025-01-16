@@ -7,7 +7,7 @@ html, body {
   body {
     font-family: 'Roboto', sans-serif; /* or your preferred font */
     /* Gradient from orange (#FFA500) at the bottom to black (#000) at the top */
-    background: linear-gradient(to top, #ff0000, #000) no-repeat;
+    background: linear-gradient(to top, #214a00, #000) no-repeat;
     background-attachment: fixed; /* Keeps gradient stationary */
     background-size: cover;       /* Fills the entire screen */
     color: #fff;                  /* White text for dark mode */
