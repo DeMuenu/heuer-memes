@@ -211,6 +211,8 @@
             </div>
         </div>
 
+
+
         <div class="admin-section">
             <h3>Achievement Management</h3>
             <div class="form-group">
@@ -410,6 +412,10 @@
             if (res.ok) {
                 fetchData();
             }
+        }
+
+        function showLoginModal() {
+            document.getElementById('loginModal').style.display = 'block';
         }
 
         fetchData();
