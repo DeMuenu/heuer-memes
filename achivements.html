@@ -211,8 +211,6 @@
             </div>
         </div>
 
-
-
         <div class="admin-section">
             <h3>Achievement Management</h3>
             <div class="form-group">
@@ -337,6 +335,11 @@
             document.getElementById('achievementPopup').style.display = 'none';
         }
 
+        function showLoginModal() {
+            document.getElementById('loginModal').style.display = 'block';
+            document.getElementById('overlay').style.display = 'block';
+        }
+
         async function login() {
             const password = document.getElementById('password').value;
             const res = await fetch(`${SERVER_URL}/api/login`, {
@@ -349,6 +352,7 @@
                 state.isAdmin = true;
                 render();
                 document.getElementById('loginModal').style.display = 'none';
+                document.getElementById('overlay').style.display = 'none';
             } else {
                 alert('Incorrect password');
             }
@@ -384,38 +388,62 @@
         }
 
         async function assignAchievement() {
-            const userId = document.getElementById('assignUser').value;
-            const achievementId = document.getElementById('assignAchievement').value;
+            const userId = parseInt(document.getElementById('assignUser').value);
+            const achievementId = parseInt(document.getElementById('assignAchievement').value);
             const level = document.getElementById('assignLevel').value;
-            if (!userId || !achievementId) return;
-            const res = await fetch(`${SERVER_URL}/api/assignAchievement`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ userId, achievementId, level }),
-                credentials: 'include'
-            });
-            if (res.ok) {
+            
+            if (!userId || !achievementId) {
+                alert("Please select both a user and an achievement");
+                return;
+            }
+
+            try {
+                const res = await fetch(`${SERVER_URL}/api/assignAchievement`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId, achievementId, level }),
+                    credentials: 'include'
+                });
+                
+                if (!res.ok) {
+                    const error = await res.json();
+                    alert(error.error || "Failed to assign achievement");
+                    return;
+                }
+                
                 fetchData();
+            } catch (err) {
+                alert("Network error: " + err.message);
             }
         }
 
         async function removeAchievement() {
-            const userId = document.getElementById('assignUser').value;
-            const achievementId = document.getElementById('assignAchievement').value;
-            if (!userId || !achievementId) return;
-            const res = await fetch(`${SERVER_URL}/api/removeAchievement`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ userId, achievementId }),
-                credentials: 'include'
-            });
-            if (res.ok) {
-                fetchData();
+            const userId = parseInt(document.getElementById('assignUser').value);
+            const achievementId = parseInt(document.getElementById('assignAchievement').value);
+            
+            if (!userId || !achievementId) {
+                alert("Please select both a user and an achievement");
+                return;
             }
-        }
 
-        function showLoginModal() {
-            document.getElementById('loginModal').style.display = 'block';
+            try {
+                const res = await fetch(`${SERVER_URL}/api/removeAchievement`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId, achievementId }),
+                    credentials: 'include'
+                });
+                
+                if (!res.ok) {
+                    const error = await res.json();
+                    alert(error.error || "Failed to remove achievement");
+                    return;
+                }
+                
+                fetchData();
+            } catch (err) {
+                alert("Network error: " + err.message);
+            }
         }
 
         fetchData();

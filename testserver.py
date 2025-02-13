@@ -72,32 +72,55 @@ def add_achievement():
 def assign_achievement():
     if not session.get('authenticated'):
         return jsonify(success=False), 401
+    
     data = request.json
+    try:
+        user_id = int(data['userId'])
+        achievement_id = int(data['achievementId'])
+        level = data['level']
+    except (KeyError, ValueError) as e:
+        return jsonify(success=False, error=str(e)), 400
+
     stored = load_data()
-    user = next((u for u in stored['users'] if u['id'] == data['userId']), None)
+    user = next((u for u in stored['users'] if u['id'] == user_id), None)
+    
+    if user and any(a['aid'] == achievement_id for a in user['achievements']):
+        return jsonify(success=False, error="Achievement already assigned"), 400
+
     if user:
         user['achievements'].append({
-            "aid": data['achievementId'],
-            "level": data['level']
+            "aid": achievement_id,
+            "level": level
         })
         with open(DATA_FILE, 'w') as f:
             json.dump(stored, f)
         return jsonify(success=True)
-    return jsonify(success=False), 404
+    return jsonify(success=False, error="User not found"), 404
 
 @app.route('/api/removeAchievement', methods=['POST'])
 def remove_achievement():
     if not session.get('authenticated'):
         return jsonify(success=False), 401
+    
     data = request.json
+    try:
+        user_id = int(data['userId'])
+        achievement_id = int(data['achievementId'])
+    except (KeyError, ValueError) as e:
+        return jsonify(success=False, error=str(e)), 400
+
     stored = load_data()
-    user = next((u for u in stored['users'] if u['id'] == data['userId']), None)
+    user = next((u for u in stored['users'] if u['id'] == user_id), None)
+    
     if user:
-        user['achievements'] = [a for a in user['achievements'] if a['aid'] != data['achievementId']]
-        with open(DATA_FILE, 'w') as f:
-            json.dump(stored, f)
-        return jsonify(success=True)
-    return jsonify(success=False), 404
+        initial_count = len(user['achievements'])
+        user['achievements'] = [a for a in user['achievements'] if a['aid'] != achievement_id]
+        if len(user['achievements']) < initial_count:
+            with open(DATA_FILE, 'w') as f:
+                json.dump(stored, f)
+            return jsonify(success=True)
+        return jsonify(success=False, error="Achievement not found"), 404
+    return jsonify(success=False, error="User not found"), 404
 
 if __name__ == '__main__':
     app.run(debug=True)
