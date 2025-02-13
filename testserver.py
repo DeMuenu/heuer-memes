@@ -1,0 +1,103 @@
+from flask import Flask, request, jsonify, session
+from flask_cors import CORS
+import json
+import os
+
+app = Flask(__name__)
+CORS(app, supports_credentials=True, origins=["*"])  # Replace with your client IP
+app.secret_key = os.urandom(24)
+DATA_FILE = 'data.json'
+
+def load_data():
+    if not os.path.exists(DATA_FILE):
+        default = {
+            "adminPassword": "admin",
+            "users": [],
+            "achievements": []
+        }
+        with open(DATA_FILE, 'w') as f:
+            json.dump(default, f)
+    return json.load(open(DATA_FILE))
+
+@app.route('/api/data', methods=['GET'])
+def get_data():
+    data = load_data()
+    return jsonify({
+        'users': data['users'],
+        'achievements': data['achievements']
+    })
+
+@app.route('/api/login', methods=['POST'])
+def handle_login():
+    data = request.json
+    stored = load_data()
+    if data.get('password') == stored['adminPassword']:
+        session['authenticated'] = True
+        return jsonify(success=True)
+    return jsonify(success=False), 401
+
+@app.route('/api/addUser', methods=['POST'])
+def add_user():
+    if not session.get('authenticated'):
+        return jsonify(success=False), 401
+    data = request.json
+    stored = load_data()
+    new_user = {
+        "id": len(stored['users']) + 1,
+        "name": data['name'],
+        "achievements": []
+    }
+    stored['users'].append(new_user)
+    with open(DATA_FILE, 'w') as f:
+        json.dump(stored, f)
+    return jsonify(success=True)
+
+@app.route('/api/addAchievement', methods=['POST'])
+def add_achievement():
+    if not session.get('authenticated'):
+        return jsonify(success=False), 401
+    data = request.json
+    stored = load_data()
+    new_achievement = {
+        "id": len(stored['achievements']) + 1,
+        "name": data['name'],
+        "description": data['description']
+    }
+    stored['achievements'].append(new_achievement)
+    with open(DATA_FILE, 'w') as f:
+        json.dump(stored, f)
+    return jsonify(success=True)
+
+@app.route('/api/assignAchievement', methods=['POST'])
+def assign_achievement():
+    if not session.get('authenticated'):
+        return jsonify(success=False), 401
+    data = request.json
+    stored = load_data()
+    user = next((u for u in stored['users'] if u['id'] == data['userId']), None)
+    if user:
+        user['achievements'].append({
+            "aid": data['achievementId'],
+            "level": data['level']
+        })
+        with open(DATA_FILE, 'w') as f:
+            json.dump(stored, f)
+        return jsonify(success=True)
+    return jsonify(success=False), 404
+
+@app.route('/api/removeAchievement', methods=['POST'])
+def remove_achievement():
+    if not session.get('authenticated'):
+        return jsonify(success=False), 401
+    data = request.json
+    stored = load_data()
+    user = next((u for u in stored['users'] if u['id'] == data['userId']), None)
+    if user:
+        user['achievements'] = [a for a in user['achievements'] if a['aid'] != data['achievementId']]
+        with open(DATA_FILE, 'w') as f:
+            json.dump(stored, f)
+        return jsonify(success=True)
+    return jsonify(success=False), 404
+
+if __name__ == '__main__':
+    app.run(debug=True)

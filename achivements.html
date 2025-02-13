@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Achievement Board</title>
+    <style>
+        :root {
+            --bg: #1a1a1a;
+            --text: #ffffff;
+            --primary: #bb86fc;
+            --secondary: #03dac6;
+            --bronze: #cd7f32;
+            --silver: #c0c0c0;
+            --gold: #ffd700;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .login-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            background: var(--primary);
+            border: none;
+            border-radius: 5px;
+            color: white;
+            cursor: pointer;
+        }
+
+        .scoreboard {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 50px;
+        }
+
+        .user-card {
+            background: #2d2d2d;
+            padding: 20px;
+            border-radius: 10px;
+            width: 300px;
+            margin: 10px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .user-card:hover {
+            transform: scale(1.05);
+        }
+
+        .achievement {
+            padding: 5px 10px;
+            margin: 5px;
+            border-radius: 5px;
+            font-size: 0.9em;
+        }
+
+        .bronze { background-color: var(--bronze); }
+        .silver { background-color: var(--silver); color: black; }
+        .gold { background-color: var(--gold); color: black; }
+
+        .admin-controls {
+            display: none;
+            background: #252525;
+            padding: 20px;
+            border-radius: 15px;
+            margin-top: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        .admin-section {
+            margin-bottom: 25px;
+            padding: 15px;
+            background: #2d2d2d;
+            border-radius: 10px;
+        }
+
+        .form-group {
+            margin: 10px 0;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .form-input {
+            flex: 1;
+            padding: 8px 12px;
+            background: #3d3d3d;
+            border: 1px solid #4a4a4a;
+            border-radius: 6px;
+            color: white;
+        }
+
+        .admin-btn {
+            background: var(--primary);
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            color: white;
+            cursor: pointer;
+            transition: transform 0.2s, opacity 0.2s;
+        }
+
+        .admin-btn:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        .admin-title {
+            color: var(--secondary);
+            border-bottom: 2px solid var(--secondary);
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #333;
+            padding: 20px;
+            border-radius: 10px;
+            z-index: 1000;
+            width: 400px;
+            max-width: 90%;
+        }
+
+        .modal input, .modal button {
+            margin: 5px;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+        }
+
+        .modal button {
+            background: var(--primary);
+            color: white;
+            cursor: pointer;
+        }
+
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 999;
+        }
+
+        .achievement-popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #333;
+            padding: 20px;
+            border-radius: 10px;
+            z-index: 1001;
+            width: 400px;
+            max-width: 90%;
+        }
+
+        .achievement-popup h3 {
+            margin-top: 0;
+        }
+
+        .achievement-popup .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5em;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <button class="login-btn" onclick="showLoginModal()">Login</button>
+    
+    <div class="scoreboard" id="scoreboard"></div>
+    <div id="userList"></div>
+    <h2>All Achievements</h2>
+    <div id="achievementsList"></div>
+
+    <div id="loginModal" class="modal">
+        <input type="password" id="password" placeholder="Password">
+        <button onclick="login()">Submit</button>
+    </div>
+
+    <div class="admin-controls" id="adminControls">
+        <h2 class="admin-title">Admin Dashboard</h2>
+        
+        <div class="admin-section">
+            <h3>User Management</h3>
+            <div class="form-group">
+                <input class="form-input" id="newUserName" placeholder="User name">
+                <button class="admin-btn" onclick="addUser()">➕ Add User</button>
+            </div>
+        </div>
+
+        <div class="admin-section">
+            <h3>Achievement Management</h3>
+            <div class="form-group">
+                <input class="form-input" id="newAchievementName" placeholder="Achievement name">
+                <input class="form-input" id="newAchievementDesc" placeholder="Description">
+                <button class="admin-btn" onclick="addAchievement()">🏆 Add Achievement</button>
+            </div>
+        </div>
+
+        <div class="admin-section">
+            <h3>Assign/Remove Achievements</h3>
+            <div class="form-group">
+                <select class="form-input" id="assignUser">
+                    <option value="">Select User</option>
+                </select>
+                <select class="form-input" id="assignAchievement">
+                    <option value="">Select Achievement</option>
+                </select>
+                <select class="form-input" id="assignLevel">
+                    <option value="bronze">Bronze</option>
+                    <option value="silver">Silver</option>
+                    <option value="gold">Gold</option>
+                </select>
+                <button class="admin-btn" onclick="assignAchievement()">Assign</button>
+                <button class="admin-btn" onclick="removeAchievement()">Remove</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="overlay" id="overlay"></div>
+    <div class="achievement-popup" id="achievementPopup">
+        <button class="close-btn" onclick="closeAchievementPopup()">×</button>
+        <h3 id="popupUserName"></h3>
+        <div id="popupAchievements"></div>
+    </div>
+
+    <script>
+        const SERVER_URL = 'http://127.0.0.1:5000'; // Replace with your server IP
+        let state = { users: [], achievements: [], isAdmin: false };
+
+        async function fetchData() {
+            const res = await fetch(`${SERVER_URL}/api/data`);
+            const data = await res.json();
+            state.users = data.users;
+            state.achievements = data.achievements;
+            render();
+        }
+
+        function render() {
+            renderScoreboard();
+            renderUserList();
+            renderAchievements();
+            if (state.isAdmin) {
+                document.getElementById('adminControls').style.display = 'block';
+                renderAssignDropdowns();
+            }
+        }
+
+        function renderScoreboard() {
+            const sorted = [...state.users].sort((a, b) => 
+                b.achievements.length - a.achievements.length
+            );
+            const top3 = sorted.slice(0, 3);
+            const scoreboard = document.getElementById('scoreboard');
+            scoreboard.innerHTML = top3.map(user => `
+                <div class="user-card" onclick="showUserAchievements(${user.id})">
+                    <h3>${user.name}</h3>
+                    <p>Achievements: ${user.achievements.length}</p>
+                </div>
+            `).join('');
+        }
+
+        function renderUserList() {
+            const sorted = [...state.users].sort((a, b) => 
+                b.achievements.length - a.achievements.length
+            );
+            const userList = document.getElementById('userList');
+            userList.innerHTML = sorted.slice(3).map(user => `
+                <div class="user-card" onclick="showUserAchievements(${user.id})">
+                    <h3>${user.name}</h3>
+                    <p>Achievements: ${user.achievements.length}</p>
+                </div>
+            `).join('');
+        }
+
+        function renderAchievements() {
+            const achievementsList = document.getElementById('achievementsList');
+            achievementsList.innerHTML = state.achievements.map(achievement => `
+                <div class="achievement">
+                    <h4>${achievement.name}</h4>
+                    <p>${achievement.description}</p>
+                </div>
+            `).join('');
+        }
+
+        function renderAssignDropdowns() {
+            const userSelect = document.getElementById('assignUser');
+            userSelect.innerHTML = '<option value="">Select User</option>' +
+                state.users.map(user => `<option value="${user.id}">${user.name}</option>`).join('');
+
+            const achievementSelect = document.getElementById('assignAchievement');
+            achievementSelect.innerHTML = '<option value="">Select Achievement</option>' +
+                state.achievements.map(achievement => `<option value="${achievement.id}">${achievement.name}</option>`).join('');
+        }
+
+        function showUserAchievements(userId) {
+            const user = state.users.find(u => u.id === userId);
+            if (user) {
+                document.getElementById('popupUserName').textContent = `${user.name}'s Achievements`;
+                const popupAchievements = document.getElementById('popupAchievements');
+                popupAchievements.innerHTML = user.achievements.map(a => {
+                    const achievement = state.achievements.find(ach => ach.id === a.aid);
+                    return `<div class="achievement ${a.level}">${achievement.name} (${a.level})</div>`;
+                }).join('');
+                document.getElementById('overlay').style.display = 'block';
+                document.getElementById('achievementPopup').style.display = 'block';
+            }
+        }
+
+        function closeAchievementPopup() {
+            document.getElementById('overlay').style.display = 'none';
+            document.getElementById('achievementPopup').style.display = 'none';
+        }
+
+        async function login() {
+            const password = document.getElementById('password').value;
+            const res = await fetch(`${SERVER_URL}/api/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ password }),
+                credentials: 'include'
+            });
+            if (res.ok) {
+                state.isAdmin = true;
+                render();
+                document.getElementById('loginModal').style.display = 'none';
+            } else {
+                alert('Incorrect password');
+            }
+        }
+
+        async function addUser() {
+            const name = document.getElementById('newUserName').value;
+            if (!name) return;
+            const res = await fetch(`${SERVER_URL}/api/addUser`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name }),
+                credentials: 'include'
+            });
+            if (res.ok) {
+                fetchData();
+            }
+        }
+
+        async function addAchievement() {
+            const name = document.getElementById('newAchievementName').value;
+            const description = document.getElementById('newAchievementDesc').value;
+            if (!name || !description) return;
+            const res = await fetch(`${SERVER_URL}/api/addAchievement`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, description }),
+                credentials: 'include'
+            });
+            if (res.ok) {
+                fetchData();
+            }
+        }
+
+        async function assignAchievement() {
+            const userId = document.getElementById('assignUser').value;
+            const achievementId = document.getElementById('assignAchievement').value;
+            const level = document.getElementById('assignLevel').value;
+            if (!userId || !achievementId) return;
+            const res = await fetch(`${SERVER_URL}/api/assignAchievement`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId, achievementId, level }),
+                credentials: 'include'
+            });
+            if (res.ok) {
+                fetchData();
+            }
+        }
+
+        async function removeAchievement() {
+            const userId = document.getElementById('assignUser').value;
+            const achievementId = document.getElementById('assignAchievement').value;
+            if (!userId || !achievementId) return;
+            const res = await fetch(`${SERVER_URL}/api/removeAchievement`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId, achievementId }),
+                credentials: 'include'
+            });
+            if (res.ok) {
+                fetchData();
+            }
+        }
+
+        fetchData();
+    </script>
+</body>
+</html>
