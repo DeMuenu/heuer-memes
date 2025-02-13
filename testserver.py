@@ -135,5 +135,46 @@ def remove_achievement():
         return jsonify(success=False, error="Achievement not found"), 404
     return jsonify(success=False, error="User not found"), 404
 
+# Neuer Endpunkt: Löschen eines Users (vollständig aus der DB entfernen)
+@app.route('/api/deleteUser', methods=['POST'])
+def delete_user():
+    if not (session.get('authenticated') and session.get('role') == 'admin'):
+        return jsonify(success=False), 401
+    data = request.json
+    try:
+        user_id = int(data['userId'])
+    except (KeyError, ValueError) as e:
+        return jsonify(success=False, error=str(e)), 400
+    stored = load_data()
+    new_users = [u for u in stored['users'] if u['id'] != user_id]
+    if len(new_users) == len(stored['users']):
+        return jsonify(success=False, error="User not found"), 404
+    stored['users'] = new_users
+    with open(DATA_FILE, 'w') as f:
+        json.dump(stored, f)
+    return jsonify(success=True)
+
+# Neuer Endpunkt: Löschen eines Achievements (aus der DB und aus allen Usern entfernen)
+@app.route('/api/deleteAchievement', methods=['POST'])
+def delete_achievement():
+    if not (session.get('authenticated') and session.get('role') == 'admin'):
+        return jsonify(success=False), 401
+    data = request.json
+    try:
+        achievement_id = int(data['achievementId'])
+    except (KeyError, ValueError) as e:
+        return jsonify(success=False, error=str(e)), 400
+    stored = load_data()
+    new_achievements = [a for a in stored['achievements'] if a['id'] != achievement_id]
+    if len(new_achievements) == len(stored['achievements']):
+        return jsonify(success=False, error="Achievement not found"), 404
+    stored['achievements'] = new_achievements
+    # Entferne dieses Achievement aus allen Usern
+    for user in stored['users']:
+        user['achievements'] = [a for a in user['achievements'] if a['aid'] != achievement_id]
+    with open(DATA_FILE, 'w') as f:
+        json.dump(stored, f)
+    return jsonify(success=True)
+
 if __name__ == '__main__':
     app.run(debug=True)

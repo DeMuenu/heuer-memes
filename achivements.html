@@ -12,6 +12,7 @@
             --bronze: #cd7f32;
             --silver: #c0c0c0;
             --gold: #ffd700;
+            --lightblue: #add8e6;
         }
 
         body {
@@ -20,6 +21,10 @@
             font-family: 'Segoe UI', sans-serif;
             margin: 0;
             padding: 20px;
+        }
+
+        h2 {
+            text-align: center;
         }
 
         .header {
@@ -37,6 +42,10 @@
             cursor: pointer;
         }
 
+        .section {
+            margin-top: 30px;
+        }
+
         .card-container {
             display: flex;
             flex-wrap: wrap;
@@ -50,24 +59,40 @@
             padding: 20px;
             border-radius: 10px;
             width: 300px;
-            margin: 10px;
             cursor: pointer;
             transition: transform 0.2s;
+            text-align: center;
         }
 
         .user-card:hover {
             transform: scale(1.05);
         }
 
+        .achievement-card {
+            border: 2px solid var(--lightblue);
+        }
+
         .achievement {
             padding: 10px;
             border-radius: 5px;
             font-size: 0.9em;
-            background: #3d3d3d;
             margin-bottom: 10px;
         }
 
-        /* Top scorer card colors */
+        /* Medalklassen für Popup-Achievements */
+        .achievement.gold {
+            background-color: var(--gold);
+            color: black;
+        }
+        .achievement.silver {
+            background-color: var(--silver);
+            color: black;
+        }
+        .achievement.bronze {
+            background-color: var(--bronze);
+        }
+
+        /* Top Scorer Kartenfarben */
         .gold-card {
             border: 3px solid var(--gold);
         }
@@ -100,6 +125,7 @@
             flex-wrap: wrap;
             gap: 10px;
             align-items: center;
+            justify-content: center;
         }
 
         .form-input {
@@ -132,6 +158,7 @@
             border-bottom: 2px solid var(--secondary);
             padding-bottom: 10px;
             margin-bottom: 15px;
+            text-align: center;
         }
 
         .modal, .achievement-popup {
@@ -174,6 +201,7 @@
 
         .achievement-popup h3 {
             margin-top: 0;
+            text-align: center;
         }
 
         .achievement-popup .close-btn {
@@ -205,18 +233,16 @@
         <button class="login-btn" id="logoutBtn" onclick="logout()" style="display:none;">Logout</button>
     </div>
     
-    <h2>Top Scorers</h2>
-    <div class="card-container" id="scoreboard"></div>
+    <div class="section users-section">
+        <h2>Top Scorers</h2>
+        <div class="card-container" id="scoreboard"></div>
+        <h2>Other Users</h2>
+        <div class="card-container" id="userList"></div>
+    </div>
 
-    <h2>Other Users</h2>
-    <div class="card-container" id="userList"></div>
-
-    <h2>All Achievements</h2>
-    <div class="card-container" id="achievementsList"></div>
-
-    <div id="loginModal" class="modal">
-        <input type="password" id="password" placeholder="Password">
-        <button onclick="login()">Submit</button>
+    <div class="section achievements-section">
+        <h2>Available Achievements</h2>
+        <div class="card-container" id="achievementsList"></div>
     </div>
 
     <div class="admin-controls" id="adminControls">
@@ -240,7 +266,7 @@
         </div>
 
         <div class="admin-section">
-            <h3>Assign/Remove Achievements</h3>
+            <h3>Assign/Remove User Achievements</h3>
             <div class="form-group">
                 <select class="form-input" id="assignUser">
                     <option value="">Select User</option>
@@ -257,6 +283,22 @@
                 <button class="admin-btn" onclick="removeAchievement()">Remove</button>
             </div>
         </div>
+
+        <div class="admin-section">
+            <h3>Remove Entities</h3>
+            <div class="form-group">
+                <select class="form-input" id="removeUserSelect">
+                    <option value="">Select User to Remove</option>
+                </select>
+                <button class="admin-btn" onclick="deleteUser()">Remove User</button>
+            </div>
+            <div class="form-group">
+                <select class="form-input" id="removeAchievementSelect">
+                    <option value="">Select Achievement to Remove</option>
+                </select>
+                <button class="admin-btn" onclick="deleteAchievement()">Remove Achievement</button>
+            </div>
+        </div>
     </div>
 
     <div class="overlay" id="overlay"></div>
@@ -266,15 +308,30 @@
         <div id="popupAchievements"></div>
     </div>
 
+    <div id="loginModal" class="modal">
+        <input type="password" id="password" placeholder="Password">
+        <button onclick="login()">Submit</button>
+    </div>
+
     <script>
         const SERVER_URL = 'http://127.0.0.1:5000'; // Passe ggf. die Server-IP an
         let state = { users: [], achievements: [], role: null, isAdmin: false };
+
+        function getMedalScore(user) {
+            let score = 0;
+            if (!user.achievements || user.achievements.length === 0) return score;
+            for (let a of user.achievements) {
+                if (a.level === 'gold') return 3;
+                if (a.level === 'silver' && score < 2) score = 2;
+                if (a.level === 'bronze' && score < 1) score = 1;
+            }
+            return score;
+        }
 
         async function fetchData() {
             try {
                 const res = await fetch(`${SERVER_URL}/api/data`, { credentials: 'include' });
                 if (res.status === 401) {
-                    // Nicht authentifiziert → Login anzeigen
                     showLoginModal();
                     return;
                 }
@@ -293,6 +350,8 @@
             renderAchievements();
             if (state.role === 'admin') {
                 document.getElementById('adminControls').style.display = 'block';
+                renderAssignDropdowns();
+                renderRemovalDropdowns();
             } else {
                 document.getElementById('adminControls').style.display = 'none';
             }
@@ -303,11 +362,15 @@
                 document.getElementById('loginBtn').style.display = 'block';
                 document.getElementById('logoutBtn').style.display = 'none';
             }
-            renderAssignDropdowns();
         }
 
         function renderScoreboard() {
-            const sorted = [...state.users].sort((a, b) => b.achievements.length - a.achievements.length);
+            const sorted = [...state.users].sort((a, b) => {
+                if (b.achievements.length !== a.achievements.length) {
+                    return b.achievements.length - a.achievements.length;
+                }
+                return getMedalScore(b) - getMedalScore(a);
+            });
             const top3 = sorted.slice(0, 3);
             const scoreboard = document.getElementById('scoreboard');
             scoreboard.innerHTML = top3.map((user, index) => {
@@ -336,7 +399,7 @@
         function renderAchievements() {
             const achievementsList = document.getElementById('achievementsList');
             achievementsList.innerHTML = state.achievements.map(achievement => 
-                `<div class="user-card">
+                `<div class="achievement-card user-card">
                     <h3>${achievement.name}</h3>
                     <p>${achievement.description}</p>
                  </div>`
@@ -349,6 +412,15 @@
                 state.users.map(user => `<option value="${user.id}">${user.name}</option>`).join('');
             const achievementSelect = document.getElementById('assignAchievement');
             achievementSelect.innerHTML = '<option value="">Select Achievement</option>' +
+                state.achievements.map(achievement => `<option value="${achievement.id}">${achievement.name}</option>`).join('');
+        }
+
+        function renderRemovalDropdowns() {
+            const removeUserSelect = document.getElementById('removeUserSelect');
+            removeUserSelect.innerHTML = '<option value="">Select User to Remove</option>' +
+                state.users.map(user => `<option value="${user.id}">${user.name}</option>`).join('');
+            const removeAchievementSelect = document.getElementById('removeAchievementSelect');
+            removeAchievementSelect.innerHTML = '<option value="">Select Achievement to Remove</option>' +
                 state.achievements.map(achievement => `<option value="${achievement.id}">${achievement.name}</option>`).join('');
         }
 
@@ -400,7 +472,7 @@
                     const data = await res.json();
                     state.role = data.role;
                     state.isAdmin = (data.role === 'admin');
-                    // Speichere Login-Info im Cookie (gültig für 7 Tage)
+                    // Speichere Login-Info im Cookie (7 Tage gültig)
                     document.cookie = `auth=${password};path=/;max-age=604800`;
                     hideLoginModal();
                     fetchData();
@@ -428,7 +500,6 @@
                         state.isAdmin = (data.role === 'admin');
                         fetchData();
                     } else {
-                        // Ungültiger Cookie → löschen
                         document.cookie = "auth=;path=/;max-age=0";
                     }
                 } catch (err) {
@@ -548,6 +619,54 @@
                 }
                 
                 fetchData();
+            } catch (err) {
+                alert("Network error: " + err.message);
+            }
+        }
+
+        async function deleteUser() {
+            const userId = parseInt(document.getElementById('removeUserSelect').value);
+            if (!userId) {
+                alert("Please select a user to remove");
+                return;
+            }
+            try {
+                const res = await fetch(`${SERVER_URL}/api/deleteUser`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId }),
+                    credentials: 'include'
+                });
+                if (res.ok) {
+                    fetchData();
+                } else {
+                    const error = await res.json();
+                    alert(error.error || "Failed to remove user");
+                }
+            } catch (err) {
+                alert("Network error: " + err.message);
+            }
+        }
+
+        async function deleteAchievement() {
+            const achievementId = parseInt(document.getElementById('removeAchievementSelect').value);
+            if (!achievementId) {
+                alert("Please select an achievement to remove");
+                return;
+            }
+            try {
+                const res = await fetch(`${SERVER_URL}/api/deleteAchievement`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ achievementId }),
+                    credentials: 'include'
+                });
+                if (res.ok) {
+                    fetchData();
+                } else {
+                    const error = await res.json();
+                    alert(error.error || "Failed to remove achievement");
+                }
             } catch (err) {
                 alert("Network error: " + err.message);
             }
