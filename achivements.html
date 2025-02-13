@@ -68,12 +68,14 @@
             transform: scale(1.05);
         }
 
-        /* Achievement-Karten mit Bildhintergrund */
+        /* Achievement-Karten: Feste Höhe von 300px */
         .achievement-card {
             position: relative;
             overflow: hidden;
             border: 2px solid var(--lightblue);
             cursor: pointer;
+            width: 300px;
+            height: 300px;
         }
         .achievement-card .card-overlay {
             position: absolute;
@@ -91,7 +93,34 @@
             box-sizing: border-box;
         }
 
-        /* Popup-Stile für Benutzer-Achievements */
+        /* Popup-Stile für User-Achievements */
+        .achievement-popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #333;
+            padding: 20px;
+            border-radius: 10px;
+            z-index: 1000;
+            width: 400px;
+            max-width: 90%;
+        }
+        .achievement-popup h3 {
+            margin-top: 0;
+            text-align: center;
+        }
+        .achievement-popup .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5em;
+            cursor: pointer;
+        }
         .achievement {
             padding: 10px;
             border-radius: 5px;
@@ -179,7 +208,35 @@
             text-align: center;
         }
 
-        .modal, .achievement-popup, .image-popup {
+        /* Popup für Großansicht des Achievement-Bildes inkl. Titel & Beschreibung */
+        .image-popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #333;
+            padding: 20px;
+            border-radius: 10px;
+            z-index: 1000;
+            width: 400px;
+            max-width: 90%;
+            text-align: center;
+        }
+        .image-popup img {
+            max-width: 100%;
+            max-height: 60vh;
+            display: block;
+            margin: 0 auto;
+        }
+        .image-popup h3 {
+            margin: 10px 0 5px;
+        }
+        .image-popup p {
+            margin: 5px 0 0;
+        }
+
+        .modal {
             display: none;
             position: fixed;
             top: 50%;
@@ -192,14 +249,12 @@
             width: 400px;
             max-width: 90%;
         }
-
         .modal input, .modal button {
             margin: 5px;
             padding: 10px;
             border: none;
             border-radius: 5px;
         }
-
         .modal button {
             background: var(--primary);
             color: white;
@@ -217,33 +272,9 @@
             z-index: 999;
         }
 
-        .achievement-popup h3, .image-popup h3 {
-            margin-top: 0;
-            text-align: center;
-        }
-
-        .achievement-popup .close-btn, .image-popup .close-btn {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: none;
-            border: none;
-            color: white;
-            font-size: 1.5em;
-            cursor: pointer;
-        }
-
-        /* Popup für Großansicht des Achievement-Bildes */
-        .image-popup img {
-            display: block;
-            margin: 0 auto;
-            max-width: 100%;
-            max-height: 80vh;
-        }
-
         /* Responsive design */
         @media (max-width: 600px) {
-            .user-card {
+            .user-card, .achievement-card {
                 width: 90%;
             }
             .form-group {
@@ -330,17 +361,19 @@
 
     <div class="overlay" id="overlay"></div>
     
-    <!-- Popup für Benutzer-Achievements -->
+    <!-- Popup für User-Achievements -->
     <div class="achievement-popup" id="achievementPopup">
         <button class="close-btn" onclick="closeAchievementPopup()">×</button>
         <h3 id="popupUserName"></h3>
         <div id="popupAchievements"></div>
     </div>
-
-    <!-- Popup für Großansicht des Achievement-Bildes -->
+    
+    <!-- Popup für Großansicht des Achievement-Bildes inkl. Titel & Beschreibung -->
     <div class="image-popup" id="imagePopup">
         <button class="close-btn" onclick="closeImagePopup()">×</button>
         <img id="fullImage" src="">
+        <h3 id="popupTitle"></h3>
+        <p id="popupDescription"></p>
     </div>
 
     <div id="loginModal" class="modal">
@@ -435,12 +468,10 @@
             const achievementsList = document.getElementById('achievementsList');
             achievementsList.innerHTML = state.achievements.map(achievement => {
                 let style = "";
-                let onclickAttr = "";
                 if (achievement.image) {
                     style = `background-image: url('${achievement.image}'); background-size: cover; background-position: center;`;
-                    onclickAttr = `onclick="showAchievementImage('${achievement.image}')"`;
                 }
-                return `<div class="achievement-card user-card" style="${style}" ${onclickAttr}>
+                return `<div class="achievement-card" style="${style}" onclick="showAchievementPopup(${achievement.id})">
                             <div class="card-overlay">
                                 <h3>${achievement.name}</h3>
                                 <p>${achievement.description}</p>
@@ -467,6 +498,7 @@
                 state.achievements.map(achievement => `<option value="${achievement.id}">${achievement.name}</option>`).join('');
         }
 
+        // Popup für User-Achievements (statt Alert)
         function showUserAchievements(userId) {
             const user = state.users.find(u => u.id === userId);
             if (user) {
@@ -486,10 +518,20 @@
             document.getElementById('achievementPopup').style.display = 'none';
         }
 
-        function showAchievementImage(imageUrl) {
-            document.getElementById('fullImage').src = imageUrl;
-            document.getElementById('overlay').style.display = 'block';
-            document.getElementById('imagePopup').style.display = 'block';
+        // Popup für Achievement-Bild, Titel & Beschreibung
+        function showAchievementPopup(achievementId) {
+            const achievement = state.achievements.find(a => a.id === achievementId);
+            if (achievement) {
+                if (achievement.image) {
+                    document.getElementById('fullImage').src = achievement.image;
+                } else {
+                    document.getElementById('fullImage').src = "";
+                }
+                document.getElementById('popupTitle').textContent = achievement.name;
+                document.getElementById('popupDescription').textContent = achievement.description;
+                document.getElementById('overlay').style.display = 'block';
+                document.getElementById('imagePopup').style.display = 'block';
+            }
         }
 
         function closeImagePopup() {
