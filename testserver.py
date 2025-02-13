@@ -77,14 +77,13 @@ def add_achievement():
     if not (session.get('authenticated') and session.get('role') == 'admin'):
         return jsonify(success=False), 401
 
-    # Unterscheidung: multipart/form-data (für Upload) oder JSON
+    # Unterschiedliche Verarbeitung: multipart/form-data (für Upload) oder JSON
     if request.content_type.startswith('multipart/form-data'):
         name = request.form.get('name')
         description = request.form.get('description')
         file = request.files.get('image')
         if file and file.filename != "":
             filename = secure_filename(file.filename)
-            # Speichere das Bild unter dem relativen Pfad (mit forward slashes)
             file.save(os.path.join(IMAGE_UPLOAD_FOLDER, filename))
             image_path = f"{IMAGE_UPLOAD_FOLDER}/{filename}"
         else:
