@@ -1,12 +1,18 @@
-from flask import Flask, request, jsonify, session
-from flask_cors import CORS
-import json
 import os
+import json
+from flask import Flask, request, jsonify, session, send_from_directory
+from flask_cors import CORS
+from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 CORS(app, supports_credentials=True, origins=["*"])  # Passe ggf. die Client-IP an
 app.secret_key = os.urandom(24)
 DATA_FILE = 'data.json'
+IMAGE_UPLOAD_FOLDER = "AchivementBilder"
+
+# Sicherstellen, dass der Upload-Ordner existiert
+if not os.path.exists(IMAGE_UPLOAD_FOLDER):
+    os.makedirs(IMAGE_UPLOAD_FOLDER)
 
 def load_data():
     if not os.path.exists(DATA_FILE):
@@ -17,7 +23,8 @@ def load_data():
         }
         with open(DATA_FILE, 'w') as f:
             json.dump(default, f)
-    return json.load(open(DATA_FILE))
+    with open(DATA_FILE, 'r') as f:
+        return json.load(f)
 
 @app.route('/api/login', methods=['POST'])
 def handle_login():
@@ -69,12 +76,31 @@ def add_user():
 def add_achievement():
     if not (session.get('authenticated') and session.get('role') == 'admin'):
         return jsonify(success=False), 401
-    data = request.json
+
+    # Unterscheidung: multipart/form-data (für Upload) oder JSON
+    if request.content_type.startswith('multipart/form-data'):
+        name = request.form.get('name')
+        description = request.form.get('description')
+        file = request.files.get('image')
+        if file and file.filename != "":
+            filename = secure_filename(file.filename)
+            # Speichere das Bild unter dem relativen Pfad (mit forward slashes)
+            file.save(os.path.join(IMAGE_UPLOAD_FOLDER, filename))
+            image_path = f"{IMAGE_UPLOAD_FOLDER}/{filename}"
+        else:
+            image_path = ""
+    else:
+        data = request.json
+        name = data.get('name')
+        description = data.get('description')
+        image_path = ""
+    
     stored = load_data()
     new_achievement = {
         "id": len(stored['achievements']) + 1,
-        "name": data['name'],
-        "description": data['description']
+        "name": name,
+        "description": description,
+        "image": image_path
     }
     stored['achievements'].append(new_achievement)
     with open(DATA_FILE, 'w') as f:
@@ -135,7 +161,7 @@ def remove_achievement():
         return jsonify(success=False, error="Achievement not found"), 404
     return jsonify(success=False, error="User not found"), 404
 
-# Neuer Endpunkt: Löschen eines Users (vollständig aus der DB entfernen)
+# Neuer Endpunkt: Löschen eines Users
 @app.route('/api/deleteUser', methods=['POST'])
 def delete_user():
     if not (session.get('authenticated') and session.get('role') == 'admin'):
@@ -154,7 +180,7 @@ def delete_user():
         json.dump(stored, f)
     return jsonify(success=True)
 
-# Neuer Endpunkt: Löschen eines Achievements (aus der DB und aus allen Usern entfernen)
+# Neuer Endpunkt: Löschen eines Achievements (und aus allen Usern entfernen)
 @app.route('/api/deleteAchievement', methods=['POST'])
 def delete_achievement():
     if not (session.get('authenticated') and session.get('role') == 'admin'):
@@ -169,12 +195,17 @@ def delete_achievement():
     if len(new_achievements) == len(stored['achievements']):
         return jsonify(success=False, error="Achievement not found"), 404
     stored['achievements'] = new_achievements
-    # Entferne dieses Achievement aus allen Usern
+    # Entferne das Achievement aus allen Usern
     for user in stored['users']:
         user['achievements'] = [a for a in user['achievements'] if a['aid'] != achievement_id]
     with open(DATA_FILE, 'w') as f:
         json.dump(stored, f)
     return jsonify(success=True)
+
+# Bereitstellung der hochgeladenen Bilder
+@app.route('/AchivementBilder/<path:filename>')
+def achievement_image(filename):
+    return send_from_directory(IMAGE_UPLOAD_FOLDER, filename)
 
 if __name__ == '__main__':
     app.run(debug=True)

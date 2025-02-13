@@ -68,18 +68,36 @@
             transform: scale(1.05);
         }
 
+        /* Achievement-Karten mit Bildhintergrund */
         .achievement-card {
+            position: relative;
+            overflow: hidden;
             border: 2px solid var(--lightblue);
+            cursor: pointer;
+        }
+        .achievement-card .card-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            padding: 10px;
+            box-sizing: border-box;
         }
 
+        /* Popup-Stile für Benutzer-Achievements */
         .achievement {
             padding: 10px;
             border-radius: 5px;
             font-size: 0.9em;
             margin-bottom: 10px;
         }
-
-        /* Medalklassen für Popup-Achievements */
         .achievement.gold {
             background-color: var(--gold);
             color: black;
@@ -161,7 +179,7 @@
             text-align: center;
         }
 
-        .modal, .achievement-popup {
+        .modal, .achievement-popup, .image-popup {
             display: none;
             position: fixed;
             top: 50%;
@@ -199,12 +217,12 @@
             z-index: 999;
         }
 
-        .achievement-popup h3 {
+        .achievement-popup h3, .image-popup h3 {
             margin-top: 0;
             text-align: center;
         }
 
-        .achievement-popup .close-btn {
+        .achievement-popup .close-btn, .image-popup .close-btn {
             position: absolute;
             top: 10px;
             right: 10px;
@@ -213,6 +231,14 @@
             color: white;
             font-size: 1.5em;
             cursor: pointer;
+        }
+
+        /* Popup für Großansicht des Achievement-Bildes */
+        .image-popup img {
+            display: block;
+            margin: 0 auto;
+            max-width: 100%;
+            max-height: 80vh;
         }
 
         /* Responsive design */
@@ -261,6 +287,7 @@
             <div class="form-group">
                 <input class="form-input" id="newAchievementName" placeholder="Achievement name">
                 <input class="form-input" id="newAchievementDesc" placeholder="Description">
+                <input type="file" id="newAchievementImage" accept="image/*">
                 <button class="admin-btn" onclick="addAchievement()">🏆 Add Achievement</button>
             </div>
         </div>
@@ -302,10 +329,18 @@
     </div>
 
     <div class="overlay" id="overlay"></div>
+    
+    <!-- Popup für Benutzer-Achievements -->
     <div class="achievement-popup" id="achievementPopup">
         <button class="close-btn" onclick="closeAchievementPopup()">×</button>
         <h3 id="popupUserName"></h3>
         <div id="popupAchievements"></div>
+    </div>
+
+    <!-- Popup für Großansicht des Achievement-Bildes -->
+    <div class="image-popup" id="imagePopup">
+        <button class="close-btn" onclick="closeImagePopup()">×</button>
+        <img id="fullImage" src="">
     </div>
 
     <div id="loginModal" class="modal">
@@ -398,12 +433,20 @@
 
         function renderAchievements() {
             const achievementsList = document.getElementById('achievementsList');
-            achievementsList.innerHTML = state.achievements.map(achievement => 
-                `<div class="achievement-card user-card">
-                    <h3>${achievement.name}</h3>
-                    <p>${achievement.description}</p>
-                 </div>`
-            ).join('');
+            achievementsList.innerHTML = state.achievements.map(achievement => {
+                let style = "";
+                let onclickAttr = "";
+                if (achievement.image) {
+                    style = `background-image: url('${achievement.image}'); background-size: cover; background-position: center;`;
+                    onclickAttr = `onclick="showAchievementImage('${achievement.image}')"`;
+                }
+                return `<div class="achievement-card user-card" style="${style}" ${onclickAttr}>
+                            <div class="card-overlay">
+                                <h3>${achievement.name}</h3>
+                                <p>${achievement.description}</p>
+                            </div>
+                        </div>`;
+            }).join('');
         }
 
         function renderAssignDropdowns() {
@@ -441,6 +484,17 @@
         function closeAchievementPopup() {
             document.getElementById('overlay').style.display = 'none';
             document.getElementById('achievementPopup').style.display = 'none';
+        }
+
+        function showAchievementImage(imageUrl) {
+            document.getElementById('fullImage').src = imageUrl;
+            document.getElementById('overlay').style.display = 'block';
+            document.getElementById('imagePopup').style.display = 'block';
+        }
+
+        function closeImagePopup() {
+            document.getElementById('overlay').style.display = 'none';
+            document.getElementById('imagePopup').style.display = 'none';
         }
 
         function showLoginModal() {
@@ -549,12 +603,17 @@
         async function addAchievement() {
             const name = document.getElementById('newAchievementName').value;
             const description = document.getElementById('newAchievementDesc').value;
-            if (!name || !description) return;
+            const fileInput = document.getElementById('newAchievementImage');
+            const formData = new FormData();
+            formData.append('name', name);
+            formData.append('description', description);
+            if(fileInput.files.length > 0) {
+                formData.append('image', fileInput.files[0]);
+            }
             try {
                 const res = await fetch(`${SERVER_URL}/api/addAchievement`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name, description }),
+                    body: formData,
                     credentials: 'include'
                 });
                 if (res.ok) {
