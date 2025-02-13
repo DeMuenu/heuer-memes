@@ -4,7 +4,7 @@ import json
 import os
 
 app = Flask(__name__)
-CORS(app, supports_credentials=True, origins=["*"])  # Replace with your client IP
+CORS(app, supports_credentials=True, origins=["*"])  # Passe ggf. die Client-IP an
 app.secret_key = os.urandom(24)
 DATA_FILE = 'data.json'
 
@@ -19,26 +19,39 @@ def load_data():
             json.dump(default, f)
     return json.load(open(DATA_FILE))
 
+@app.route('/api/login', methods=['POST'])
+def handle_login():
+    data = request.json
+    password = data.get('password')
+    stored = load_data()
+    if password == stored['adminPassword']:
+        session['authenticated'] = True
+        session['role'] = 'admin'
+        return jsonify(success=True, role='admin')
+    elif password == 'view':
+        session['authenticated'] = True
+        session['role'] = 'viewer'
+        return jsonify(success=True, role='viewer')
+    return jsonify(success=False), 401
+
+@app.route('/api/logout', methods=['POST'])
+def logout():
+    session.clear()
+    return jsonify(success=True)
+
 @app.route('/api/data', methods=['GET'])
 def get_data():
+    if not session.get('authenticated'):
+        return jsonify(success=False, error="Not authenticated"), 401
     data = load_data()
     return jsonify({
         'users': data['users'],
         'achievements': data['achievements']
     })
 
-@app.route('/api/login', methods=['POST'])
-def handle_login():
-    data = request.json
-    stored = load_data()
-    if data.get('password') == stored['adminPassword']:
-        session['authenticated'] = True
-        return jsonify(success=True)
-    return jsonify(success=False), 401
-
 @app.route('/api/addUser', methods=['POST'])
 def add_user():
-    if not session.get('authenticated'):
+    if not (session.get('authenticated') and session.get('role') == 'admin'):
         return jsonify(success=False), 401
     data = request.json
     stored = load_data()
@@ -54,7 +67,7 @@ def add_user():
 
 @app.route('/api/addAchievement', methods=['POST'])
 def add_achievement():
-    if not session.get('authenticated'):
+    if not (session.get('authenticated') and session.get('role') == 'admin'):
         return jsonify(success=False), 401
     data = request.json
     stored = load_data()
@@ -70,7 +83,7 @@ def add_achievement():
 
 @app.route('/api/assignAchievement', methods=['POST'])
 def assign_achievement():
-    if not session.get('authenticated'):
+    if not (session.get('authenticated') and session.get('role') == 'admin'):
         return jsonify(success=False), 401
     
     data = request.json
@@ -99,7 +112,7 @@ def assign_achievement():
 
 @app.route('/api/removeAchievement', methods=['POST'])
 def remove_achievement():
-    if not session.get('authenticated'):
+    if not (session.get('authenticated') and session.get('role') == 'admin'):
         return jsonify(success=False), 401
     
     data = request.json
