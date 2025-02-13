@@ -469,7 +469,7 @@
             achievementsList.innerHTML = state.achievements.map(achievement => {
                 let style = "";
                 if (achievement.image) {
-                    style = `background-image: url('${achievement.image}'); background-size: cover; background-position: center;`;
+                    style = `background-image: url('${SERVER_URL}/${achievement.image}'); background-size: cover; background-position: center;`;
                 }
                 return `<div class="achievement-card" style="${style}" onclick="showAchievementPopup(${achievement.id})">
                             <div class="card-overlay">
@@ -523,7 +523,7 @@
             const achievement = state.achievements.find(a => a.id === achievementId);
             if (achievement) {
                 if (achievement.image) {
-                    document.getElementById('fullImage').src = achievement.image;
+                    document.getElementById('fullImage').src = `${SERVER_URL}/${achievement.image}`;
                 } else {
                     document.getElementById('fullImage').src = "";
                 }
