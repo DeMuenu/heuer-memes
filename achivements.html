@@ -455,7 +455,12 @@
         }
 
         function renderUserList() {
-            const sorted = [...state.users].sort((a, b) => b.achievements.length - a.achievements.length);
+            const sorted = [...state.users].sort((a, b) => {
+                if (b.achievements.length !== a.achievements.length) {
+                    return b.achievements.length - a.achievements.length;
+                }
+                return getMedalScore(b) - getMedalScore(a);
+            });
             const userList = document.getElementById('userList');
             userList.innerHTML = sorted.slice(3).map(user => 
                 `<div class="user-card" onclick="showUserAchievements(${user.id})">
