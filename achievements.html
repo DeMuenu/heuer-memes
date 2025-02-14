@@ -633,21 +633,21 @@
 
     // Show login modal and check if the password input can receive focus.
     function showLoginModal() {
-    const loginModal = document.getElementById('loginModal');
-    loginModal.style.display = 'block';
-    document.getElementById('overlay').style.display = 'block';
-    const passwordField = document.getElementById('password');
-    passwordField.focus();
-    
-    // After a short delay, show or hide the embedded hint depending on whether the field is disabled.
-    setTimeout(() => {
-        const hint = document.getElementById('passwordHint');
-        if (passwordField.disabled) {
-        hint.style.display = 'block';
-        } else {
-        hint.style.display = 'none';
-        }
-    }, 300);
+        const loginModal = document.getElementById('loginModal');
+        loginModal.style.display = 'block';
+        document.getElementById('overlay').style.display = 'block';
+        const passwordField = document.getElementById('password');
+        passwordField.focus();
+        
+        // After a short delay, show or hide the embedded hint depending on whether the field is disabled.
+        setTimeout(() => {
+            const hint = document.getElementById('passwordHint');
+            if (document.activeElement !== passwordField) {
+            hint.style.display = 'block';
+            } else {
+            hint.style.display = 'none';
+            }
+        }, 300);
     }
 
     function hideLoginModal() {
