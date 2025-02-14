@@ -1,7 +1,7 @@
 /*************************************************************/
 /* Global or shared variables (if you want them for both)    */
 /*************************************************************/
-const ipPortStories = 'https://data.heuer-memes.ch:8443'; // For Website One
+const ipPortStories = 'data.heuer-memes.ch:8443'; // For Website One
 const ipReviews = 'https://data.heuer-memes.ch';
 const ipPortReviews = 'https://data.heuer-memes.ch:8443';
 
