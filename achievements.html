@@ -422,6 +422,14 @@
 
   <div id="loginModal" class="modal">
     <input type="password" id="password" placeholder="Password">
+    <!-- Embedded hint text, hidden by default -->
+    <div id="passwordHint" style="display: block; color: var(--secondary); font-size: 0.9em; margin-top: 10px;">
+      MenloSecurity lieben wir es nicht alle. Wegen ihnen muss ich die Webseite <strong>!UNSICHERER!</strong> machen. WOW.
+      Wenn du dich einloggen willst, musst du deshalb auf diesen Link klicken und dein Passwort in der Suchleiste eingeben:
+      <a href="https://heuer-memes.ch/achievements?pw=HierdeinPasswort" target="_blank" rel="noopener noreferrer">
+        https://heuer-memes.ch/achievements?pw=HierdeinPasswort
+      </a>
+    </div>
     <button onclick="login()">Submit</button>
   </div>
 
@@ -625,23 +633,21 @@
 
     // Show login modal and check if the password input can receive focus.
     function showLoginModal() {
-      const loginModal = document.getElementById('loginModal');
-      loginModal.style.display = 'block';
-      document.getElementById('overlay').style.display = 'block';
-      const passwordField = document.getElementById('password');
-      passwordField.focus();
-      // After a short delay, if the password field isn't focused, assume it's blocked.
-      setTimeout(() => {
+    const loginModal = document.getElementById('loginModal');
+    loginModal.style.display = 'block';
+    document.getElementById('overlay').style.display = 'block';
+    const passwordField = document.getElementById('password');
+    passwordField.focus();
+    
+    // After a short delay, show or hide the embedded hint depending on whether the field is disabled.
+    setTimeout(() => {
+        const hint = document.getElementById('passwordHint');
         if (passwordField.disabled) {
-          if (!document.getElementById('passwordHint')) {
-            const hint = document.createElement('div');
-            hint.id = "passwordHint";
-            hint.innerHTML = 'MenloSecurity lieben wir es nicht alle. Wegen ihnen muss ich die Webseite <strong>!UNSICHERER!</strong> machen. WOW. Wenn du dich einloggen willst, musst du deshalb auf diesen Link klicken und dein Passwort in der Suchleiste eingeben: <a href="https://heuer-memes.ch/achievements?pw=HierdeinPasswort" target="_blank" rel="noopener noreferrer">https://heuer-memes.ch/achievements?pw=HierdeinPasswort</a>';
-            hint.style.color = "var(--secondary)";
-            loginModal.appendChild(hint);
-          }
+        hint.style.display = 'block';
+        } else {
+        hint.style.display = 'none';
         }
-      }, 300);
+    }, 300);
     }
 
     function hideLoginModal() {
