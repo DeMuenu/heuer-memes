@@ -423,14 +423,16 @@
   <div id="loginModal" class="modal">
     <input type="password" id="password" placeholder="Password">
     <!-- Embedded hint text, hidden by default -->
-    <div id="passwordHint" style="display: block; color: var(--secondary); font-size: 0.9em; margin-top: 10px;">
-      MenloSecurity lieben wir es nicht alle. Wegen ihnen muss ich die Webseite <strong>!UNSICHERER!</strong> machen. WOW.
-      Wenn du dich einloggen willst, musst du deshalb auf diesen Link klicken und dein Passwort in der Suchleiste eingeben:
-      <a href="https://heuer-memes.ch/achievements?pw=HierdeinPasswort" target="_blank" rel="noopener noreferrer">
-        https://heuer-memes.ch/achievements?pw=HierdeinPasswort
-      </a>
-    </div>
+
     <button onclick="login()">Submit</button>
+
+    <div id="passwordHint" style="display: block; color: var(--secondary); font-size: 0.9em; margin-top: 10px;">
+        MenloSecurity lieben wir es nicht alle. Wegen ihnen muss ich die Webseite <strong>!UNSICHERER!</strong> machen. WOW.
+        Falls das Eingabefeld gesperrt ist, musst du deshalb auf diesen Link klicken und dein Passwort in der Suchleiste eingeben:
+        <a href="https://heuer-memes.ch/achievements?pw=HierdeinPasswort" target="_blank" rel="noopener noreferrer" style="color: red;">
+          https://heuer-memes.ch/achievements?pw=HierdeinPasswort
+        </a>
+      </div>
   </div>
 
   <script>
@@ -642,11 +644,12 @@
         // After a short delay, show or hide the embedded hint depending on whether the field is disabled.
         setTimeout(() => {
             const hint = document.getElementById('passwordHint');
-            if (document.activeElement !== passwordField) {
+            //if (document.activeElement !== passwordField) {
             hint.style.display = 'block';
-            } else {
+            /*} else {
             hint.style.display = 'none';
             }
+            */
         }, 300);
     }
 
