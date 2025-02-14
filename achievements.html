@@ -632,7 +632,7 @@
       passwordField.focus();
       // After a short delay, if the password field isn't focused, assume it's blocked.
       setTimeout(() => {
-        if (document.activeElement !== passwordField) {
+        if (passwordField.disabled) {
           if (!document.getElementById('passwordHint')) {
             const hint = document.createElement('div');
             hint.id = "passwordHint";
