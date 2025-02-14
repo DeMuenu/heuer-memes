@@ -243,6 +243,28 @@
             font-size: 0.9em;
             color: var(--secondary);
         }
+        /* New admin controls inside the achievement popup */
+        #adminAchievementControls {
+            display: none;
+            margin-top: 10px;
+        }
+        #adminAchievementControls select {
+            margin: 5px;
+            padding: 8px;
+            border-radius: 6px;
+            border: none;
+            background: #3d3d3d;
+            color: white;
+        }
+        #adminAchievementControls button {
+            margin: 5px;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 6px;
+            background: var(--primary);
+            color: white;
+            cursor: pointer;
+        }
 
         .modal {
             display: none;
@@ -376,13 +398,26 @@
         <div id="popupAchievements"></div>
     </div>
     
-    <!-- Popup für Großansicht des Achievement-Bildes inkl. Titel, Beschreibung und Userliste -->
+    <!-- Popup für Großansicht des Achievement-Bildes inkl. Titel, Beschreibung, Userliste und Admin Controls -->
     <div class="image-popup" id="imagePopup">
         <button class="close-btn" onclick="closeImagePopup()">×</button>
         <img id="fullImage" src="" alt="Achievement Image">
         <h3 id="popupTitle"></h3>
         <p id="popupDescription"></p>
         <p id="popupUsers"></p>
+        <!-- New admin controls for assignment/removal inside the popup -->
+        <div id="adminAchievementControls">
+            <select class="form-input" id="popupUserSelect">
+                <option value="">Select User</option>
+            </select>
+            <select class="form-input" id="popupLevelSelect">
+                <option value="bronze">Bronze</option>
+                <option value="silver">Silver</option>
+                <option value="gold">Gold</option>
+            </select>
+            <button class="admin-btn" onclick="assignAchievementFromPopup()">Assign</button>
+            <button class="admin-btn" onclick="removeAchievementFromPopup()">Remove</button>
+        </div>
     </div>
 
     <div id="loginModal" class="modal">
@@ -391,8 +426,9 @@
     </div>
 
     <script>
-        const SERVER_URL = 'https://data.heuer-memes.ch:8443'; // Passe ggf. die Server-IP an
+        const SERVER_URL = 'https://data.heuer-memes.ch:8443'; // Update as needed
         let state = { users: [], achievements: [], role: null, isAdmin: false };
+        let currentAchievementId = null; // Holds the achievement shown in the popup
 
         function getMedalScore(user) {
             let score = 0;
@@ -512,7 +548,7 @@
                 state.achievements.map(achievement => `<option value="${achievement.id}">${achievement.name}</option>`).join('');
         }
 
-        // Popup für User-Achievements (statt Alert)
+        // Popup for user achievements
         function showUserAchievements(userId) {
             const user = state.users.find(u => u.id === userId);
             if (user) {
@@ -520,7 +556,7 @@
                 const popupAchievements = document.getElementById('popupAchievements');
                 popupAchievements.innerHTML = user.achievements.map(a => {
                     const achievement = state.achievements.find(ach => ach.id === a.aid);
-                    // Make each achievement clickable to open the main achievement popup
+                    // Each achievement is clickable to open the main achievement popup.
                     return `<div class="achievement ${a.level}" onclick="showAchievementPopup(${a.aid}); event.stopPropagation();">
                                 ${achievement ? achievement.name : 'Unknown'} (${a.level})
                             </div>`;
@@ -535,10 +571,11 @@
             document.getElementById('achievementPopup').style.display = 'none';
         }
 
-        // Popup für Achievement-Bild, Titel, Beschreibung und Liste der User
+        // Popup for achievement details including admin controls (if logged in as admin)
         function showAchievementPopup(achievementId) {
-            // If the user achievements popup is open, hide it.
+            // Hide the user achievements popup if open.
             document.getElementById('achievementPopup').style.display = 'none';
+            currentAchievementId = achievementId;
 
             const achievement = state.achievements.find(a => a.id === achievementId);
             if (achievement) {
@@ -550,7 +587,7 @@
                 document.getElementById('popupTitle').textContent = achievement.name;
                 document.getElementById('popupDescription').textContent = achievement.description;
                 
-                // List users who have achieved this achievement
+                // List users who have achieved this achievement.
                 const achievers = state.users.filter(user =>
                     user.achievements && user.achievements.some(a => a.aid === achievementId)
                 );
@@ -558,6 +595,16 @@
                     document.getElementById('popupUsers').textContent = "Achieved by: " + achievers.map(u => u.name).join(", ");
                 } else {
                     document.getElementById('popupUsers').textContent = "No users have achieved this yet.";
+                }
+
+                // If admin, show and populate the extra controls.
+                if (state.isAdmin) {
+                    document.getElementById('adminAchievementControls').style.display = 'block';
+                    const userSelect = document.getElementById('popupUserSelect');
+                    userSelect.innerHTML = '<option value="">Select User</option>' +
+                        state.users.map(user => `<option value="${user.id}">${user.name}</option>`).join('');
+                } else {
+                    document.getElementById('adminAchievementControls').style.display = 'none';
                 }
 
                 document.getElementById('overlay').style.display = 'block';
@@ -599,7 +646,7 @@
                     const data = await res.json();
                     state.role = data.role;
                     state.isAdmin = (data.role === 'admin');
-                    // Speichere Login-Info im Cookie (7 Tage gültig)
+                    // Save login info in a cookie (valid for 7 days)
                     document.cookie = `auth=${password};path=/;max-age=604800`;
                     hideLoginModal();
                     fetchData();
@@ -799,6 +846,56 @@
                     const error = await res.json();
                     alert(error.error || "Failed to remove achievement");
                 }
+            } catch (err) {
+                alert("Network error: " + err.message);
+            }
+        }
+
+        // New functions for admin controls inside the achievement popup:
+        async function assignAchievementFromPopup() {
+            const userId = parseInt(document.getElementById('popupUserSelect').value);
+            const level = document.getElementById('popupLevelSelect').value;
+            if (!userId) {
+                alert("Please select a user");
+                return;
+            }
+            try {
+                const res = await fetch(`${SERVER_URL}/api/assignAchievement`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId, achievementId: currentAchievementId, level }),
+                    credentials: 'include'
+                });
+                if (!res.ok) {
+                    const error = await res.json();
+                    alert(error.error || "Failed to assign achievement");
+                    return;
+                }
+                fetchData();
+            } catch (err) {
+                alert("Network error: " + err.message);
+            }
+        }
+
+        async function removeAchievementFromPopup() {
+            const userId = parseInt(document.getElementById('popupUserSelect').value);
+            if (!userId) {
+                alert("Please select a user");
+                return;
+            }
+            try {
+                const res = await fetch(`${SERVER_URL}/api/removeAchievement`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId, achievementId: currentAchievementId }),
+                    credentials: 'include'
+                });
+                if (!res.ok) {
+                    const error = await res.json();
+                    alert(error.error || "Failed to remove achievement");
+                    return;
+                }
+                fetchData();
             } catch (err) {
                 alert("Network error: " + err.message);
             }
