@@ -405,7 +405,7 @@
         <h3 id="popupTitle"></h3>
         <p id="popupDescription"></p>
         <p id="popupUsers"></p>
-        <!-- New admin controls for assignment/removal inside the popup -->
+        <!-- Admin controls inside the achievement popup -->
         <div id="adminAchievementControls">
             <select class="form-input" id="popupUserSelect">
                 <option value="">Select User</option>
@@ -429,6 +429,12 @@
         const SERVER_URL = 'https://data.heuer-memes.ch:8443'; // Update as needed
         let state = { users: [], achievements: [], role: null, isAdmin: false };
         let currentAchievementId = null; // Holds the achievement shown in the popup
+
+        // Helper: Get query parameter by name.
+        function getQueryParam(param) {
+            const params = new URLSearchParams(window.location.search);
+            return params.get(param);
+        }
 
         function getMedalScore(user) {
             let score = 0;
@@ -571,7 +577,7 @@
             document.getElementById('achievementPopup').style.display = 'none';
         }
 
-        // Popup for achievement details including admin controls (if logged in as admin)
+        // Popup for achievement details (with admin controls if logged in as admin)
         function showAchievementPopup(achievementId) {
             // Hide the user achievements popup if open.
             document.getElementById('achievementPopup').style.display = 'none';
@@ -617,9 +623,22 @@
             document.getElementById('imagePopup').style.display = 'none';
         }
 
+        // Show login modal; if the password input is disabled, display a hint.
         function showLoginModal() {
-            document.getElementById('loginModal').style.display = 'block';
+            const loginModal = document.getElementById('loginModal');
+            loginModal.style.display = 'block';
             document.getElementById('overlay').style.display = 'block';
+            const passwordField = document.getElementById('password');
+            if (passwordField.disabled) {
+                if (!document.getElementById('passwordHint')) {
+                    const hint = document.createElement('div');
+                    hint.id = "passwordHint";
+                    hint.textContent = "Password input disabled. To use a different password, append '?pw=yourpassword' to the URL.";
+                    hint.style.fontSize = "0.8em";
+                    hint.style.color = "var(--secondary)";
+                    loginModal.appendChild(hint);
+                }
+            }
         }
 
         function hideLoginModal() {
@@ -901,8 +920,27 @@
             }
         }
 
+        // On page load, check for URL parameter "pw". If present, disable the input and auto-login.
         window.onload = function() {
-            autoLogin();
+            const pwParam = getQueryParam('pw');
+            if (pwParam) {
+                const passwordField = document.getElementById('password');
+                passwordField.value = pwParam;
+                passwordField.disabled = true;
+                // Append a hint in the login modal.
+                const loginModal = document.getElementById('loginModal');
+                if (!document.getElementById('passwordHint')) {
+                    const hint = document.createElement('div');
+                    hint.id = "passwordHint";
+                    hint.textContent = "Password input disabled. To use a different password, append '?pw=yourpassword' to the URL.";
+                    hint.style.fontSize = "0.8em";
+                    hint.style.color = "var(--secondary)";
+                    loginModal.appendChild(hint);
+                }
+                login(); // Auto-login with the provided password.
+            } else {
+                autoLogin();
+            }
         };
     </script>
 </body>
