@@ -127,6 +127,7 @@
             border-radius: 5px;
             font-size: 0.9em;
             margin-bottom: 10px;
+            cursor: pointer;
         }
         .achievement.gold {
             background-color: var(--gold);
@@ -235,6 +236,12 @@
         }
         .image-popup p {
             margin: 5px 0 0;
+        }
+        /* New section to display which users achieved the achievement */
+        .image-popup #popupUsers {
+            margin-top: 10px;
+            font-size: 0.9em;
+            color: var(--secondary);
         }
 
         .modal {
@@ -369,12 +376,13 @@
         <div id="popupAchievements"></div>
     </div>
     
-    <!-- Popup für Großansicht des Achievement-Bildes inkl. Titel & Beschreibung -->
+    <!-- Popup für Großansicht des Achievement-Bildes inkl. Titel, Beschreibung und Userliste -->
     <div class="image-popup" id="imagePopup">
         <button class="close-btn" onclick="closeImagePopup()">×</button>
         <img id="fullImage" src="" alt="Achievement Image">
         <h3 id="popupTitle"></h3>
         <p id="popupDescription"></p>
+        <p id="popupUsers"></p>
     </div>
 
     <div id="loginModal" class="modal">
@@ -512,7 +520,10 @@
                 const popupAchievements = document.getElementById('popupAchievements');
                 popupAchievements.innerHTML = user.achievements.map(a => {
                     const achievement = state.achievements.find(ach => ach.id === a.aid);
-                    return `<div class="achievement ${a.level}">${achievement ? achievement.name : 'Unknown'} (${a.level})</div>`;
+                    // Make each achievement clickable to open the main achievement popup
+                    return `<div class="achievement ${a.level}" onclick="showAchievementPopup(${a.aid}); event.stopPropagation();">
+                                ${achievement ? achievement.name : 'Unknown'} (${a.level})
+                            </div>`;
                 }).join('');
                 document.getElementById('overlay').style.display = 'block';
                 document.getElementById('achievementPopup').style.display = 'block';
@@ -524,8 +535,11 @@
             document.getElementById('achievementPopup').style.display = 'none';
         }
 
-        // Popup für Achievement-Bild, Titel & Beschreibung
+        // Popup für Achievement-Bild, Titel, Beschreibung und Liste der User
         function showAchievementPopup(achievementId) {
+            // If the user achievements popup is open, hide it.
+            document.getElementById('achievementPopup').style.display = 'none';
+
             const achievement = state.achievements.find(a => a.id === achievementId);
             if (achievement) {
                 if (achievement.image) {
@@ -535,6 +549,17 @@
                 }
                 document.getElementById('popupTitle').textContent = achievement.name;
                 document.getElementById('popupDescription').textContent = achievement.description;
+                
+                // List users who have achieved this achievement
+                const achievers = state.users.filter(user =>
+                    user.achievements && user.achievements.some(a => a.aid === achievementId)
+                );
+                if (achievers.length > 0) {
+                    document.getElementById('popupUsers').textContent = "Achieved by: " + achievers.map(u => u.name).join(", ");
+                } else {
+                    document.getElementById('popupUsers').textContent = "No users have achieved this yet.";
+                }
+
                 document.getElementById('overlay').style.display = 'block';
                 document.getElementById('imagePopup').style.display = 'block';
             }
