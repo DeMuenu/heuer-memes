@@ -1,9 +1,9 @@
 /*************************************************************/
 /* Global or shared variables (if you want them for both)    */
 /*************************************************************/
-const ipPortStories = 'vps2441966.servdiscount-customer.com:5000'; // For Website One
-const ipReviews = 'https://vps2441966.servdiscount-customer.com';
-const ipPortReviews = 'https://vps2441966.servdiscount-customer.com:5000';
+const ipPortStories = 'https://data.heuer-memes.ch:8443'; // For Website One
+const ipReviews = 'https://data.heuer-memes.ch';
+const ipPortReviews = 'https://data.heuer-memes.ch:8443';
 
 /*************************************************************/
 /*                   Website One: Heuer-Stories              */
@@ -339,8 +339,8 @@ function initHeuerKunst() {
     }
   
     // Endpoints for Heuer-Kunst (slightly different from Reviews):
-    const ipKunst = 'https://vps2441966.servdiscount-customer.com';
-    const ipPortKunst = 'https://vps2441966.servdiscount-customer.com:5000';
+    const ipKunst = 'https://data.heuer-memes.ch';
+    const ipPortKunst = 'https://data.heuer-memes.ch:8443';
   
     // By default, hide the send form
     sendForm.style.display = 'none';
