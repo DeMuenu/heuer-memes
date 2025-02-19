@@ -758,9 +758,9 @@
       const name = document.getElementById('newAchievementName').value;
       const description = document.getElementById('newAchievementDesc').value;
       const fileInput = document.getElementById('newAchievementImage');
-      const IsSimuSafeVar = document.getElementById('IsSimuSafe').value;
+      const IsSimuSafeVar = document.getElementById('IsSimuSafe').checked;
       const formData = new FormData();
-      if(IsSimuSafeVar == 1){
+      if(IsSimuSafeVar){
         formData.append('Simon', "Simon");
       }
       formData.append('name', name);
