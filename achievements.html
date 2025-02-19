@@ -351,6 +351,7 @@
         <input class="form-input" id="newAchievementName" placeholder="Achievement name">
         <input class="form-input" id="newAchievementDesc" placeholder="Description">
         <input type="file" id="newAchievementImage" accept="image/*">
+        <input type="checkbox" id="IsSimuSafe">
         <button class="admin-btn" onclick="addAchievement()">🏆 Add Achievement</button>
       </div>
     </div>
@@ -757,7 +758,11 @@
       const name = document.getElementById('newAchievementName').value;
       const description = document.getElementById('newAchievementDesc').value;
       const fileInput = document.getElementById('newAchievementImage');
+      const IsSimuSafeVar = document.getElementById('IsSimuSafe').value;
       const formData = new FormData();
+      if(IsSimuSafeVar == 1){
+        formData.append('Simon', "Simon");
+      }
       formData.append('name', name);
       formData.append('description', description);
       if(fileInput.files.length > 0) {
